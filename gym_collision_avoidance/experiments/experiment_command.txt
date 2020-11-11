@@ -1,0 +1,19 @@
+Experiment 1,2 for all algorithms:
+
+./run_experiment_cadrl.sh;./run_experiment_linear.sh;./run_experiment_rvo.sh;./run_experiment_socialforce.sh;./run_experiment_socialgan_stgcnn;./run_experiment_cvm;./run_experiment_slstm.sh;./run_experiment_spec.sh;
+
+
+
+
+Experiment 3,4 for all algorithms  in PD 0.3:
+
+./run_experiment_3_4_0.3.sh;
+
+
+Experiment 3,4 for all algorithms  in PD 0.6:
+
+./run_experiment_3_4_0.6.sh;
+
+
+
+

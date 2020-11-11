@@ -1,0 +1,43 @@
+**************************************************
+Number of samples: 20
+**************************************************
+Model being tested are: ['./checkpoint/social-stgcnn-eth', './checkpoint/social-stgcnn-zara2', './checkpoint/social-stgcnn-univ', './checkpoint/social-stgcnn-zara1', './checkpoint/social-stgcnn-hotel']
+**************************************************
+Evaluating model: ./checkpoint/social-stgcnn-eth
+Stats: {'min_val_epoch': 248, 'min_val_loss': -0.015072189948775551}
+Processing Data .....
+100%|███████████████████████████████████████████| 70/70 [00:03<00:00, 21.59it/s]
+Testing ....
+ADE: 0.7298677099293571  FDE: 1.1962580429955236
+**************************************************
+Evaluating model: ./checkpoint/social-stgcnn-zara2
+Stats: {'min_val_epoch': 243, 'min_val_loss': -0.013492159500807345}
+Processing Data .....
+100%|█████████████████████████████████████████| 921/921 [00:57<00:00, 16.05it/s]
+Testing ....
+ADE: 0.3039082939974066  FDE: 0.483349352789493
+**************************************************
+Evaluating model: ./checkpoint/social-stgcnn-univ
+Stats: {'min_val_epoch': 153, 'min_val_loss': -0.009756729709652235}
+Processing Data .....
+100%|█████████████████████████████████████████| 947/947 [07:21<00:00,  2.14it/s]
+Testing ....
+ADE: 0.48785089193870884  FDE: 0.9124643423562221
+**************************************************
+Evaluating model: ./checkpoint/social-stgcnn-zara1
+Stats: {'min_val_epoch': 196, 'min_val_loss': -0.01428595929106405}
+Processing Data .....
+100%|█████████████████████████████████████████| 602/602 [00:30<00:00, 19.67it/s]
+Testing ....
+ADE: 0.33312695152276484  FDE: 0.5211028691329063
+**************************************************
+Evaluating model: ./checkpoint/social-stgcnn-hotel
+Stats: {'min_val_epoch': 234, 'min_val_loss': -0.014858260246866567}
+Processing Data .....
+100%|█████████████████████████████████████████| 301/301 [00:13<00:00, 22.15it/s]
+Testing ....
+ADE: 0.4087298872227519  FDE: 0.6799120719965166
+**************************************************
+Avg ADE: 0.45269674692219786
+Avg FDE: 0.7586173358541323
+

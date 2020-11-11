@@ -1,0 +1,7 @@
+[submodule "gym_collision_avoidance/envs/policies/Python-RVO2"]
+	path = gym_collision_avoidance/envs/policies/Python-RVO2
+	url = https://github.com/mit-acl/Python-RVO2.git
+	ignore = dirty
+[submodule "gym_collision_avoidance/envs/policies/rl-collision-avoidance"]
+	path = gym_collision_avoidance/envs/policies/DRL_Long
+	url = https://github.com/Acmece/rl-collision-avoidance.git
