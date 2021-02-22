@@ -19,6 +19,7 @@ Helbing, D., & Molnar, P. (1995). Social force model for pedestrian dynamics. Ph
 [link to paper](https://arxiv.org/abs/cond-mat/9805244)
 
 **Implementation References**  
+
 Social Force Implementation modified from [here](https://github.com/svenkreiss/socialforce)
 
 ---
