@@ -6,12 +6,18 @@ if platform == "darwin":
     mpl.use('TkAgg')
 import matplotlib.pyplot as plt
 import matplotlib
+
+matplotlib.use('TkAgg')
+
 import os
 import matplotlib.patches as ptch
 from matplotlib.collections import LineCollection
 import glob
 import imageio
 
+# Filter list by Boolean list 
+# Using itertools.compress 
+from itertools import compress
 
 matplotlib.rcParams.update({'font.size': 24})
 
@@ -34,7 +40,7 @@ def get_plot_save_dir(plot_save_dir, plot_policy_name, agents=None):
     collision_plot_dir = plot_save_dir + "/collisions/"
     os.makedirs(collision_plot_dir, exist_ok=True)
 
-    base_fig_name = "{test_case}_{policy}_{num_agents}agents{step}.{extension}"
+    base_fig_name = "{test_case}_{policy}_{step}.{extension}"
     return plot_save_dir, plot_policy_name, base_fig_name, collision_plot_dir
 
 def animate_episode(num_agents, plot_save_dir=None, plot_policy_name=None, test_case_index=0, agents=None):
@@ -43,13 +49,11 @@ def animate_episode(num_agents, plot_save_dir=None, plot_policy_name=None, test_
     # Load all images of the current episode (each animation)
     fig_name = base_fig_name.format(
             policy=plot_policy_name,
-            num_agents = num_agents,
             test_case = str(test_case_index).zfill(3),
             step="_*",
             extension='png')
     last_fig_name = base_fig_name.format(
             policy=plot_policy_name,
-            num_agents = num_agents,
             test_case = str(test_case_index).zfill(3),
             step="",
             extension='png')
@@ -69,7 +73,6 @@ def animate_episode(num_agents, plot_save_dir=None, plot_policy_name=None, test_
     # Save the gif in a new animations sub-folder
     animation_filename = base_fig_name.format(
             policy=plot_policy_name,
-            num_agents = num_agents,
             test_case = str(test_case_index).zfill(3),
             step="",
             extension='gif')
@@ -91,10 +94,14 @@ def plot_episode(agents, in_evaluate_mode,
     env_map=None, test_case_index=0, env_id=0,
     circles_along_traj=True, plot_save_dir=None, plot_policy_name=None,
     save_for_animation=False, limits=None, perturbed_obs=None,
-    fig_size=(10,8), show=False, save=False):
+    fig_size=(10,8), show=False, save=False, active_agent_mask=None, episode_step_num=0):
 
     if max([agent.step_num for agent in agents]) == 0:
         return
+    
+    if active_agent_mask is None: active_agent_mask= [False] * len(agents)
+    active_agents = list(compress(agents, active_agent_mask))
+    
 
     plot_save_dir, plot_policy_name, base_fig_name, collision_plot_dir = get_plot_save_dir(plot_save_dir, plot_policy_name, agents)
 
@@ -110,15 +117,15 @@ def plot_episode(agents, in_evaluate_mode,
 
     if perturbed_obs is None:
         # Normal case of plotting
-        max_time = draw_agents(agents, circles_along_traj, ax)
+        max_time = draw_agents(active_agents, circles_along_traj, ax)
     else:
-        max_time = draw_agents(agents, circles_along_traj, ax, last_index=-2)
-        plot_perturbed_observation(agents, ax, perturbed_obs)
+        max_time = draw_agents(active_agents, circles_along_traj, ax, last_index=-2)
+        plot_perturbed_observation(active_agents, ax, perturbed_obs)
 
-    # Label the axes
+    # Label the axesg
     plt.xlabel('x (m)')
     plt.ylabel('y (m)')
-
+    plt.text(0.5, 0.95, "Frame: " + str(episode_step_num), fontsize=12, transform=ax.transAxes)
     # plotting style (only show axis on bottom and left)
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
@@ -157,32 +164,38 @@ def plot_episode(agents, in_evaluate_mode,
     if in_evaluate_mode and save:
         fig_name = base_fig_name.format(
             policy=plot_policy_name,
-            num_agents = len(agents),
             test_case = str(test_case_index).zfill(3),
             step="",
             extension='png')
-        filename = plot_save_dir+fig_name
-        plt.savefig(filename)
 
-        if np.any([agent.in_collision for agent in agents]):
-            plt.savefig(collision_plot_dir+fig_name)
+        if np.any([agent.in_collision for agent in active_agents]):
+            plt.savefig(collision_plot_dir+fig_name.replace(".png", "_%s" % str(episode_step_num))+".png", dpi=100)
+            return
+
+        filename = plot_save_dir+fig_name
+        plt.savefig(filename, dpi=100)
+
+
 
     if save_for_animation:
         fig_name = base_fig_name.format(
             policy=plot_policy_name,
-            num_agents = len(agents),
             test_case = str(test_case_index).zfill(3),
             step="_"+"{:06.1f}".format(max_time),
             extension='png')
         filename = plot_save_dir+fig_name
-        plt.savefig(filename)
+        plt.savefig(filename, dpi=100)
 
     if show:
         plt.pause(0.0001)
 
+
 def draw_agents(agents, circles_along_traj, ax, last_index=-1):
 
-    max_time = max([agent.global_state_history[agent.step_num+last_index, 0] for agent in agents] + [1e-4])
+    #This line seems to cause trouble when in dynamic mode, since maximum length of history does not necessarily means the latest scene 
+    #max_time = max([agent.global_state_history[agent.step_num+last_index, 0] for agent in agents] + [1e-4])
+
+    max_time = max([agent.step_num for agent in agents] + [1e-4])
     max_time_alpha_scalar = 1.2
     for i, agent in enumerate(agents):
 
@@ -190,6 +203,10 @@ def draw_agents(agents, circles_along_traj, ax, last_index=-1):
         agent_policy_name_list       = [ agent_policy.policy.str for agent_policy in agents ]
         unique_agent_policy_name_list = list(np.unique(agent_policy_name_list))
         color_ind = unique_agent_policy_name_list.index(agent.policy.str)
+
+        filled_global_state_history = agent.global_state_history
+        filled_global_state_history[:agent.start_step_num , 1 ] = agent.global_state_history[agent.start_step_num][1]
+        filled_global_state_history[:agent.start_step_num , 2 ] = agent.global_state_history[agent.start_step_num][2]
 
         plt_color = plt_colors[color_ind]
 
@@ -256,6 +273,8 @@ def draw_agents(agents, circles_along_traj, ax, last_index=-1):
                     agent.global_state_history[ind, 2] + y_text_offset,
                     '%.1f' % agent.global_state_history[ind, 0],
                     color=plt_color)
+            ax.text(filled_global_state_history[ind, 1], filled_global_state_history[ind, 2], agent.id, fontsize=10,
+                    ha='center', va='center')
 
             # if hasattr(agent.policy, 'deltaPos'):
             #     arrow_start = agent.global_state_history[ind, 1:3]
@@ -264,21 +283,33 @@ def draw_agents(agents, circles_along_traj, ax, last_index=-1):
             #     ax.add_patch(ptch.FancyArrowPatch(arrow_start, arrow_end, arrowstyle=style, color='black'))
 
         else:
+            #added to label goals
+            plt.plot(agent.target_global_frame[0],
+                     agent.target_global_frame[1],
+                     color=plt_color, marker='*', markersize=20)
+
+            #print("circles_along_traj false")
             colors = np.zeros((agent.step_num, 4))
             colors[:,:3] = plt_color
             colors[:, 3] = np.linspace(0.2, 1., agent.step_num)
             colors = rgba2rgb(colors)
 
-            plt.scatter(agent.global_state_history[:agent.step_num, 1],
-                     agent.global_state_history[:agent.step_num, 2],
+            #print("X"*15)
+            #print(agent.global_state_history[:agent.step_num, 1])
+            #print(agent.global_state_history[:agent.step_num, 2])
+
+            plt.scatter(filled_global_state_history[:agent.step_num, 1],
+                     filled_global_state_history[:agent.step_num, 2],
                      color=colors)
 
             # Also display circle at agent position at end of trajectory
             ind = agent.step_num + last_index
             alpha = 0.7
             c = rgba2rgb(plt_color+[float(alpha)])
-            ax.add_patch(plt.Circle(agent.global_state_history[ind, 1:3],
+            ax.add_patch(plt.Circle(filled_global_state_history[ind, 1:3],
                          radius=agent.radius, fc=c, ec=plt_color))
+            ax.text(filled_global_state_history[ind, 1], filled_global_state_history[ind, 2], agent.id, fontsize=10,
+                    ha='center', va='center')
             # y_text_offset = 0.1
             # ax.text(agent.global_state_history[ind, 1] - 0.15,
             #         agent.global_state_history[ind, 2] + y_text_offset,

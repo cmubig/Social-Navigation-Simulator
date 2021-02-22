@@ -2,9 +2,39 @@ import os
 import numpy as np
 import gym
 gym.logger.set_level(40)
+
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("--output_name"          , type=str, required=False, help="the output folder name for this run of experiment... e.g. exp1_ETH_CADRL or exp2_0.3_CADRL")
+parser.add_argument("--experiment_num"       , type=int, required=True, help="which experiment are we running (1,2,???)")
+parser.add_argument("--algorithm_name"       , type=str, required=False, help="which algorithm are we using? CADRL,RVO,SOCIALFORCE,  SPEC, STGCNN, SLSTM, SOCIALGAN")
+
+parser.add_argument("--experiment_iteration" , type=int, required=False, help="for each experiment, how many iteration (how many scenario, from start to goal) should it generate?")
+parser.add_argument("--timeout"              , type=int, required=True, help="how many seconds for the experiment to terminate, and declare on-going agents timeout?")
+
+parser.add_argument("--population_density"   , type=float, required=False, default="-1.0" ,help="under exp2, what population density should be used?")
+parser.add_argument("--dataset_name"         , type=str  , required=False, default="None" ,help="under exp1, for the exp settings of algortihms, which dataset should they mimick?")
+args = parser.parse_args()
+print(args)
+
+experiment_number = args.experiment_num
+algorithm_name    = args.algorithm_name
+
+experiment_iteration_num = args.experiment_iteration
+timeout = args.timeout
+
+dataset_name = args.dataset_name
+population_density = args.population_density
+
+os.environ["global_timeout"]             = str(timeout)
+os.environ["global_experiment_number"]   = str(experiment_number)
+os.environ["global_dataset_name"]        = str(dataset_name)
+os.environ["global_population_density"]  = str(population_density)
+
 os.environ['GYM_CONFIG_CLASS'] = 'Example'
-from gym_collision_avoidance.envs import test_cases as tc
 from gym_collision_avoidance.envs import Config
+from gym_collision_avoidance.envs import test_cases as tc
+
 
 def main():
     '''
@@ -33,12 +63,22 @@ def main():
 
     # Repeatedly send actions to the environment based on agents' observations
     num_steps = 100
+    set_point = np.pi/6.0
+    P = 1.0
+    int_err = 0.0
+    err = 0.0
     for i in range(num_steps):
 
         # Query the external agents' policies
         # e.g., actions[0] = external_policy(dict_obs[0])
         actions = {}
-        actions[0] = np.array([1., 0.5])
+
+        # basic test, have 1st agent go on set heading
+        p_err = err
+        curr = agents[0].heading_global_frame
+        err = set_point - agents[0].heading_global_frame
+        control = np.clip(P*err, -1, 1)/2.0 + 0.5
+        actions[0] = np.array([1.0, control])
 
         # Internal agents (running a pre-learned policy defined in envs/policies)
         # will automatically query their policy during env.step

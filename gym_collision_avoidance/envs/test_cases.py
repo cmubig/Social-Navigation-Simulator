@@ -38,7 +38,7 @@ from gym_collision_avoidance.envs.policies.SPECPolicy import SPECPolicy
 from gym_collision_avoidance.envs.policies.SOCIALFORCEPolicy import SOCIALFORCEPolicy
 from gym_collision_avoidance.envs.policies.SLSTMPolicy import SLSTMPolicy
 from gym_collision_avoidance.envs.policies.SOCIALGANPolicy import SOCIALGANPolicy
-from gym_collision_avoidance.envs.policies.GROUPNAVIGANPolicy import GROUPNAVIGANPolicy
+# from gym_collision_avoidance.envs.policies.GROUPNAVIGANPolicy import GROUPNAVIGANPolicy
 from gym_collision_avoidance.envs.policies.CVMPolicy import CVMPolicy
 
 # Dynamics
@@ -77,7 +77,7 @@ policy_dict = {
     'SOCIALFORCE' : SOCIALFORCEPolicy,
     'SLSTM' : SLSTMPolicy,
     'SOCIALGAN' : SOCIALGANPolicy,
-    'GROUPNAVIGAN' : GROUPNAVIGANPolicy,
+    # 'GROUPNAVIGAN' : GROUPNAVIGANPolicy,
     'CVM' : CVMPolicy,
 }
 
@@ -367,8 +367,11 @@ def custom_formation(agents, test_case, test_case_index, num_agents):
         #start_x, start_y = agent.pos_global_frame
 
         #use this instead if every scenario is carried out separatly ( not start from where the last scenario ended )
-        agent_id, agent_algorithm, start_x, start_y, goal_x, goal_y, pref_speed, radius, start_timestamp = scenario[test_case_index][agent.id]
+        agent_id, agent_algorithm, start_x, start_y, goal_x, goal_y, pref_speed, radius, past_traj = scenario[test_case_index][agent.id]
         agent.reset(px=start_x, py=start_y, gx=goal_x, gy=goal_y, heading=agent.heading_global_frame)
+
+        if type(past_traj)!=int:  agent.past_traj = past_traj
+        
     return agents
     
 

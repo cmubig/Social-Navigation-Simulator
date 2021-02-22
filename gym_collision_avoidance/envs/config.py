@@ -12,12 +12,12 @@ class Config(object):
         self.ACTION_SPACE_TYPE   = self.continuous
 
         ### DISPLAY
-        self.ANIMATE_EPISODES    = False
+        self.ANIMATE_EPISODES    = True
         self.SHOW_EPISODE_PLOTS = False
-        self.SAVE_EPISODE_PLOTS = False
+        self.SAVE_EPISODE_PLOTS = True
         if not hasattr(self, "PLOT_CIRCLES_ALONG_TRAJ"):
             self.PLOT_CIRCLES_ALONG_TRAJ = True
-        self.ANIMATION_PERIOD_STEPS = 5 # plot every n-th DT step (if animate mode on)
+        self.ANIMATION_PERIOD_STEPS = 2 # plot every n-th DT step (if animate mode on)
         self.PLT_LIMITS = None
         self.PLT_FIG_SIZE = (10, 8)
 
@@ -202,12 +202,21 @@ class EvaluateConfig(Config):
 class Example(EvaluateConfig):
     def __init__(self):
         EvaluateConfig.__init__(self)
-        self.SAVE_EPISODE_PLOTS = True
-        self.PLOT_CIRCLES_ALONG_TRAJ = True
-        self.ANIMATE_EPISODES = True
-        # self.SENSING_HORIZON = 4
-        # self.PLT_LIMITS = [[-20, 20], [-20, 20]]
-        # self.PLT_FIG_SIZE = (10,10)
+        self.SAVE_EPISODE_PLOTS                = master_config.SAVE_EPISODE_PLOTS
+        self.SHOW_EPISODE_PLOTS                = master_config.SHOW_EPISODE_PLOTS
+        self.ANIMATE_EPISODES                  = master_config.ANIMATE_EPISODES
+        self.NEAR_GOAL_THRESHOLD               = master_config.NEAR_GOAL_THRESHOLD
+        self.PLT_LIMITS                        = [[-10, 10], [-10, 10]]
+        self.PLT_FIG_SIZE                      = master_config.PLT_FIG_SIZE
+        self.PLOT_CIRCLES_ALONG_TRAJ           = master_config.PLOT_CIRCLES_ALONG_TRAJ
+        self.NUM_AGENTS_TO_TEST                = master_config.NUM_AGENTS_TO_TEST
+        self.POLICIES_TO_TEST                  = master_config.POLICIES_TO_TEST
+        self.NUM_TEST_CASES                    = master_config.NUM_TEST_CASES
+
+
+        self.MAX_NUM_AGENTS_IN_ENVIRONMENT     = master_config.MAX_NUM_AGENTS_IN_ENVIRONMENT
+        self.MAX_NUM_OTHER_AGENTS_OBSERVED     = master_config.MAX_NUM_OTHER_AGENTS_OBSERVED
+        self.agent_time_out                    = master_config.agent_time_out
 
 class Formations(EvaluateConfig):   #CADRL
     def __init__(self):
@@ -232,7 +241,7 @@ class Custom(EvaluateConfig):
         self.SHOW_EPISODE_PLOTS                = master_config.SHOW_EPISODE_PLOTS 
         self.ANIMATE_EPISODES                  = master_config.ANIMATE_EPISODES
         self.NEAR_GOAL_THRESHOLD               = master_config.NEAR_GOAL_THRESHOLD
-        self.PLT_LIMITS                        = master_config.PLT_LIMITS 
+        self.PLT_LIMITS                        = master_config.PLT_LIMITS
         self.PLT_FIG_SIZE                      = master_config.PLT_FIG_SIZE 
         self.PLOT_CIRCLES_ALONG_TRAJ           = master_config.PLOT_CIRCLES_ALONG_TRAJ
         self.NUM_AGENTS_TO_TEST                = master_config.NUM_AGENTS_TO_TEST

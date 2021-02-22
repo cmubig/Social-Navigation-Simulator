@@ -6,13 +6,17 @@ import rvo2
 
 import matplotlib.pyplot as plt
 
+# Filter list by Boolean list 
+# Using itertools.compress 
+from itertools import compress
+
 class RVOPolicy(InternalPolicy):
     def __init__(self):
         InternalPolicy.__init__(self, str="RVO")
 
         self.dt = Config.DT
-        neighbor_dist = Config.SENSING_HORIZON
-        max_neighbors = Config.MAX_NUM_AGENTS_IN_ENVIRONMENT
+        self.neighbor_dist = Config.SENSING_HORIZON
+        self.max_neighbors = Config.MAX_NUM_AGENTS_IN_ENVIRONMENT
 
         self.has_fixed_speed = False
         self.heading_noise = False
@@ -20,11 +24,11 @@ class RVOPolicy(InternalPolicy):
         self.max_delta_heading = np.pi/6
         
         # TODO share this parameter with environment
-        time_horizon = Config.RVO_TIME_HORIZON # NOTE: bjorn used 1.0 in training for corl19
+        self.time_horizon = Config.RVO_TIME_HORIZON # NOTE: bjorn used 1.0 in training for corl19
         # Initialize RVO simulator
-        self.sim = rvo2.PyRVOSimulator(timeStep=self.dt, neighborDist=neighbor_dist, 
-            maxNeighbors=max_neighbors, timeHorizon=time_horizon, 
-            timeHorizonObst=time_horizon, radius=0.0, 
+        self.sim = rvo2.PyRVOSimulator(timeStep=self.dt, neighborDist=self.neighbor_dist, 
+            maxNeighbors=self.max_neighbors, timeHorizon=self.time_horizon, 
+            timeHorizonObst=self.time_horizon, radius=0.0, 
             maxSpeed=0.0)
 
         self.is_init = False
@@ -32,6 +36,11 @@ class RVOPolicy(InternalPolicy):
         self.use_non_coop_policy = True
 
     def init(self):
+        self.sim = None
+        self.sim = rvo2.PyRVOSimulator(timeStep=self.dt, neighborDist=self.neighbor_dist, 
+            maxNeighbors=self.max_neighbors, timeHorizon=self.time_horizon, 
+            timeHorizonObst=self.time_horizon, radius=0.0, 
+            maxSpeed=0.0)
         state_dim = 2
         self.pos_agents = np.empty((self.n_agents, state_dim))
         self.vel_agents = np.empty((self.n_agents, state_dim))
@@ -47,12 +56,24 @@ class RVOPolicy(InternalPolicy):
         
         self.is_init = True
 
-    def find_next_action(self, obs, agents, agent_index):
+    def find_next_action(self, obs, agents, agent_index, full_agent_list = None, active_agent_mask = None):
         # Initialize vectors on first call to infer number of agents
-        if not self.is_init:
-            self.n_agents = len(agents)
-            self.init()
-            
+        #if not self.is_init:
+        #    self.n_agents = len(agents)
+        #    self.init()
+
+        #check if elements before index contains non active agents, if yes, remove them, thus calculate the index shift
+        before_index = np.array(active_agent_mask)[:agent_index]
+
+        #see how many non active agents are before index,  minus them calculate index shift
+        agent_index = agent_index - len( before_index[ before_index==False ] )
+
+        agents = list(compress(full_agent_list, active_agent_mask))
+
+        #Since number of agent is dynamic within a iteration now... need refresh every step
+        self.n_agents = len(agents)
+        self.init()
+        
         # Share all agent positions and preferred velocities from environment with RVO simulator
         for a in range(self.n_agents):
             # Copy current agent positions, goal and preferred speeds into np arrays

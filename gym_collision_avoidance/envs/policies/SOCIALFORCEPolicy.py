@@ -14,6 +14,9 @@ from gym_collision_avoidance.envs.policies import socialforce
 import copy
 import argparse
 
+# Filter list by Boolean list 
+# Using itertools.compress 
+from itertools import compress
 
 class SOCIALFORCEPolicy(InternalPolicy):
     def __init__(self):
@@ -32,9 +35,19 @@ class SOCIALFORCEPolicy(InternalPolicy):
 
         self.is_init = True
 
-    def find_next_action(self, obs, agents, i ):
+    def find_next_action(self, obs, agents, i , full_agent_list = None, active_agent_mask = None):
 
-        agent_index = i 
+        agent_index = i
+
+        #check if elements before index contains non active agents, if yes, remove them, thus calculate the index shift
+        before_index = np.array(active_agent_mask)[:agent_index]
+
+        #see how many non active agents are before index,  minus them calculate index shift
+        agent_index = agent_index - len( before_index[ before_index==False ] )
+
+        agents = list(compress(full_agent_list, active_agent_mask))
+
+        
         observation_array = [] #observation array for social force, consist of N row of agents, each row = vector (x, y, v_x, v_y, d_x, d_y, [tau])
         
         if not self.is_init:   #Execute one time per init (complete simulation iteration)
@@ -53,6 +66,10 @@ class SOCIALFORCEPolicy(InternalPolicy):
 
 
         else:
+            ##added for dynamic num of agents compatibility
+            self.n_agents = len(agents)
+            self.init(agents)
+
             for a in range(self.n_agents):
                 if  agents[a].speed_global_frame<= agents[a].pref_speed/3:
                     pos_difference = agents[a].goal_global_frame -  agents[a].pos_global_frame    
@@ -66,8 +83,8 @@ class SOCIALFORCEPolicy(InternalPolicy):
                     
                     observation_array.append( [  agents[a].pos_global_frame[0], agents[a].pos_global_frame[1], agents[a].vel_global_frame[0], agents[a].vel_global_frame[1], agents[a].goal_global_frame[0], agents[a].goal_global_frame[1]   ]  )
 
-        print("goal")
-        print(agents[agent_index].goal_global_frame)
+        #print("goal")
+        #print(agents[agent_index].goal_global_frame)
         
         initial_state = np.array( observation_array )
         s=None
@@ -75,8 +92,8 @@ class SOCIALFORCEPolicy(InternalPolicy):
         s = socialforce.Simulator(initial_state, delta_t=0.1)
         states = np.stack([s.step().state.copy() for _ in range(1)]) #step one time only
 
-        print("states")
-        print(states)
+        #print("states")
+        #print(states)
 
         next_waypoint_x = states[:, agent_index, 0][0]
         next_waypoint_y = states[:, agent_index, 1][0]
@@ -109,8 +126,8 @@ class SOCIALFORCEPolicy(InternalPolicy):
         #But in reality, the format of action is [speed, heading_delta]
 
         action = np.array([speed_global_frame, -heading_ego_frame])
-        print("action")
-        print(action)
+        #print("action")
+        #print(action)
        
         return action
 

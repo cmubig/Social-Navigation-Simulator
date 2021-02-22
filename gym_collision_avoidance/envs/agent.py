@@ -27,14 +27,18 @@ class Agent(object):
 
     """
     def __init__(self, start_x, start_y, goal_x, goal_y, radius,
-                 pref_speed, initial_heading, policy, dynamics_model, sensors, id):
+                 pref_speed, initial_heading, policy, dynamics_model, sensors, id ):
         self.policy = policy()
         self.dynamics_model = dynamics_model(self)
         self.sensors = [sensor() for sensor in sensors]
 
         # Store past selected actions
         self.chosen_action_dict = {}
+        self.time_since_collision = np.inf
 
+        self.collision_stop_countdown = 10 #10 * 0.1s
+        
+        self.collision_cooldown = self.collision_stop_countdown + 20  #20 * 0.1s
         self.num_actions_to_store = 2
         self.action_dim = 2
         
@@ -42,6 +46,9 @@ class Agent(object):
         self.dist_to_goal = 0.0
         self.near_goal_threshold = Config.NEAR_GOAL_THRESHOLD
         self.dt_nominal = Config.DT
+
+        self.is_out_of_bounds = False
+        self.out_of_bounds_timestep = None
 
         self.min_x = -20.0
         self.max_x = 20.0
@@ -54,7 +61,7 @@ class Agent(object):
         
         self.reset(px=start_x, py=start_y, gx=goal_x, gy=goal_y, pref_speed=pref_speed, radius=radius, heading=initial_heading)
 
-    def reset(self, px=None, py=None, gx=None, gy=None, pref_speed=None, radius=None, heading=None, previous_history=None):
+    def reset(self, px=None, py=None, gx=None, gy=None, pref_speed=None, radius=None, heading=None, previous_history=None , start_step_num=None, start_t=None):
         """ Reset an agent with different states/goal, delete history and reset timer (but keep its dynamics, policy, sensors)
 
         :param px: (float or int) x position of agent in global frame at start of episode
@@ -74,8 +81,13 @@ class Agent(object):
         # Global Frame states
         if px is not None and py is not None:
             self.pos_global_frame = np.array([px, py], dtype='float64')
+
         if gx is not None and gy is not None:
             self.goal_global_frame = np.array([gx, gy], dtype='float64')
+
+        self.start_global_frame  = np.array([px, py], dtype='float64')
+        self.target_global_frame = np.array([gx, gy], dtype='float64')
+            
         self.vel_global_frame = np.array([0.0, 0.0], dtype='float64')
         self.speed_global_frame = 0.0
 
@@ -94,22 +106,41 @@ class Agent(object):
         self.past_actions = np.zeros((self.num_actions_to_store,
                                       self.action_dim))
 
+        #If no specify start_timestep, then assume the agent initalize at timestep 0
+        if start_step_num is None or start_t is None:
+            self.t = 0.0
+            self.step_num = 0
+
+
+        else:
+            
+            self.t = start_t
+            self.step_num = start_step_num
+            
+        self.start_t = self.t
+        self.start_step_num = self.step_num
+
+    
+        self.past_traj = None
+
+
+
         # Other parameters
         if radius is not None:
             self.radius = radius
         if pref_speed is not None:
             self.pref_speed = pref_speed
 
+
         self.straight_line_time_to_reach_goal = (np.linalg.norm(self.pos_global_frame - self.goal_global_frame) - self.near_goal_threshold)/self.pref_speed
         if Config.EVALUATE_MODE or Config.PLAY_MODE:
-            self.time_remaining_to_reach_goal = Config.agent_time_out #Config.MAX_TIME_RATIO*self.straight_line_time_to_reach_goal
+            self.time_remaining_to_reach_goal = Config.agent_time_out - self.start_t #Config.MAX_TIME_RATIO*self.straight_line_time_to_reach_goal
         else:
-            self.time_remaining_to_reach_goal = Config.agent_time_out #Config.MAX_TIME_RATIO*self.straight_line_time_to_reach_goal
+            self.time_remaining_to_reach_goal = Config.agent_time_out - self.start_t #Config.MAX_TIME_RATIO*self.straight_line_time_to_reach_goal
         self.time_remaining_to_reach_goal = max(self.time_remaining_to_reach_goal, self.dt_nominal)
-        self.t = 0.0
 
-        self.step_num = 0
 
+        
         self.is_at_goal = False
         self.was_at_goal_already = False
         self.was_in_collision_already = False
@@ -142,11 +173,12 @@ class Agent(object):
 
         self.is_done = False
 
+
         #added to track agent ending timestep
-        self.collision_timestep = None
+        self.collision_timestep = []
         self.arrival_timestep = None
         self.timeout_timestep = None
-
+        
     def __deepcopy__(self, memo):
         """ Copy every attribute about the agent except its policy (since that may contain MBs of DNN weights) """
         cls = self.__class__
@@ -159,7 +191,17 @@ class Agent(object):
     def _check_if_at_goal(self):
         """ Set :code:`self.is_at_goal` if norm(pos_global_frame - goal_global_frame) <= near_goal_threshold """
         is_near_goal = (self.pos_global_frame[0] - self.goal_global_frame[0])**2 + (self.pos_global_frame[1] - self.goal_global_frame[1])**2 <= self.near_goal_threshold**2
+
+
         self.is_at_goal = is_near_goal
+
+    def _check_if_out_of_bounds(self):
+        bbox = Config.PLT_LIMITS
+        x_min,x_max = bbox[0]
+        y_min,y_max = bbox[1]
+        is_out_of_bounds = (self.pos_global_frame[0] < x_min or self.pos_global_frame[0] > x_max) or \
+                        (self.pos_global_frame[1] < y_min or self.pos_global_frame[1] > y_max)
+        self.is_out_of_bounds = is_out_of_bounds
 
     def set_state(self, px, py, vx=None, vy=None, heading=None):
         """ Without doing a full reset, update the agent's current state (pos, vel, heading).
@@ -246,20 +288,11 @@ class Agent(object):
             dt (float): time in seconds to execute :code:`action`
 
         """
-   
-        
-        # Agent is done if any of these conditions hold (at goal, out of time, in collision). Stop moving if so & ignore the action.
-        if self.is_at_goal or self.ran_out_of_time or self.in_collision:
+        # Agent is done if any of these conditions hold (at goal, out of time, out of bbox). Stop moving if so & ignore the action.
+        if self.is_at_goal or self.ran_out_of_time or self.is_out_of_bounds:
             if self.is_at_goal:
-    
                 self.was_at_goal_already = True
-                
-                
-            if self.in_collision:
 
-                self.was_in_collision_already = True
-                
-                
             #self.vel_global_frame = np.array([0.0, 0.0])
             #self._store_past_velocities()
 
@@ -278,6 +311,30 @@ class Agent(object):
             self.t += dt
             self.step_num += 1
             return
+
+        # if collided and cooldown is over, can count as new collision
+        if self.in_collision and (self.time_since_collision >= self.collision_cooldown):
+            self.was_in_collision_already = True
+            self.in_collision = False
+            self.time_since_collision = 0
+
+            action = np.array( [0,0] )
+
+
+                
+
+        # if in a collision but cooldown is still there, collision is blocked
+        elif self.was_in_collision_already and (self.time_since_collision < self.collision_cooldown):
+
+            if (self.time_since_collision < self.collision_stop_countdown): action = np.array( [0,0] )
+
+                            
+            self.time_since_collision += 1
+
+        # if not in collision and cooldown timer is released, the agent was not in a collision within collision_cooldown seconds
+        # reset collision flag
+        if not self.in_collision and (self.time_since_collision >= self.collision_cooldown):
+            self.was_in_collision_already = False
 
         # Store past actions
         self.past_actions = np.roll(self.past_actions, 1, axis=0)
@@ -298,10 +355,10 @@ class Agent(object):
         self._update_state_history()
 
         self._check_if_at_goal()
+        self._check_if_out_of_bounds()
 
         self._store_past_velocities()
- 
-       
+        
         # Update time left so agent does not run around forever
         self.time_remaining_to_reach_goal -= dt
 
@@ -309,6 +366,7 @@ class Agent(object):
         self.step_num += 1
         if self.time_remaining_to_reach_goal <= 0.0:
             self.ran_out_of_time = True
+
         return
 
     def sense(self, agents, agent_index, top_down_map):

@@ -57,9 +57,6 @@ from gym_collision_avoidance.envs import Config
 import gym_collision_avoidance.envs.test_cases as tc
 from gym_collision_avoidance.experiments.src.env_utils import run_episode, create_env, store_stats, policies
 
-
-
-
 LINEAR      = 0
 NonCooperativePolicy = 0
 SOCIALFORCE = 1 
@@ -73,9 +70,8 @@ SOCIALGAN   = 18
 STGCNN      = 19 
 SPEC        = 20 
 
-motion_list = [ "CVM" , "SLSTM" , "SGAN" , "STGCNN", "SPEC" ]
+motion_list = [ "CVM" , "SLSTM" , "SOCIALGAN" , "STGCNN", "SPEC" ]
 navigation_list = [ "LINEAR" , "SOCIALFORCE" , "RVO" , "CADRL" ,"NAVIGAN" ]
-
 
 ###########################Dataset output##################################
 def add_traj(agents, trajs, dt, traj_i, max_ts):
@@ -183,7 +179,7 @@ def main():
 
     env, one_env = create_env()
     dt = one_env.dt_nominal #retrieve framerate
-
+    
     experiment_type = str(folder_policy_name).split("_")[0]
 
     if any(motion_policy in folder_policy_name for motion_policy in motion_list):
@@ -198,6 +194,7 @@ def main():
 
     #one_env.set_plot_save_dir(  os.path.dirname(os.path.realpath(__file__)) + '/../results/sam_traj_output_ex/')
     one_env.set_plot_save_dir(  os.path.dirname(os.path.realpath(__file__)) + '/../results/'+experiment_type+"/"+policy_type+"/"+str(folder_policy_name)+'/')
+
 
     pkl_dir = file_dir + '/test/'
     os.makedirs(pkl_dir, exist_ok=True)
@@ -216,14 +213,12 @@ def main():
     for test_case_index in range(num_of_test_case):
 
         overall_record = {}
-        
-        print("XX1XX")
-        print(list(scenario_config.scenario))
-        print("XX2XX")
-        print(test_case_index)
-        print("XXXXXX3")
-        print([test_case_index])
-        print(list(scenario_config.scenario)[test_case_index])
+        #if test_case_index == 4:
+        #    print("caught")
+        #print(list(scenario_config.scenario))
+        #print(test_case_index)
+        #print([test_case_index])
+        #print(list(scenario_config.scenario)[test_case_index])
         agent_policies_list = np.array(list(scenario_config.scenario)[test_case_index])[:,1] #this scenario's policies list
         num_agents = len(agent_policies_list)
         print("num_agents")
@@ -241,7 +236,7 @@ def main():
 
         one_env.plot_policy_name = str(np.unique(agent_policies_list)[0]) #perhaps it is just the name?
         print("before episode")
-        episode_stats, prev_agents = run_episode(env, one_env)
+        episode_stats, prev_agents, presence_dict = run_episode(env, one_env)
         print("after episode")
         #print(episode_stats)
         #episode_stats returned something like this
@@ -271,7 +266,7 @@ def main():
         max_ts = [t / dt for t in times_to_goal]
         trajs = add_traj(prev_agents, trajs, dt, test_case_index, max_ts)
 
-        #########################
+
         output_list = []
         
         for agent_index in range(len(prev_agents)): #iterate the agents
@@ -279,9 +274,10 @@ def main():
             for t in range(len(prev_agents[agent_index].global_state_history)):  #print all the records of a agent
 
                 if t>(steps-1): break
-                
-                #output_list.append([ t*10, agent_index, prev_agents[agent_index].global_state_history[t, 1], prev_agents[agent_index].global_state_history[t, 2] ])
-                output_list.append([int(t*10), float(agent_index), round(float(prev_agents[agent_index].global_state_history[t, 1]),2) , round(float(prev_agents[agent_index].global_state_history[t, 2]),2) ] )         
+
+                if agent_index in presence_dict[t]:
+                    #output_list.append([ t*10, agent_index, prev_agents[agent_index].global_state_history[t, 1], prev_agents[agent_index].global_state_history[t, 2] ])
+                    output_list.append([int(t*10), float(agent_index), round(float(prev_agents[agent_index].global_state_history[t, 1]),2) , round(float(prev_agents[agent_index].global_state_history[t, 2]),2) ] )
 
         #sort by timestamp
         output_list = np.array(output_list)
@@ -294,6 +290,7 @@ def main():
         output_list = output_list[~np.isnan(output_list[:,2:4]).any(1)] #filter any ridiculous number
 
         #np.savetxt(file_dir+'/trajs/np_test_case_'+str(test_case)+'.txt', output_list, fmt="%d\t%.1f\t%.2f\t%.2f")
+
 
 
         ##########################################
@@ -319,21 +316,36 @@ def main():
 
         ##########################################
         presence_list = []
-        
-        for agent in range(len(prev_agents)): #iterate the agents
 
-            if    prev_agents[agent].is_at_goal   or prev_agents[agent].was_at_goal_already:
-                #if arrived but later involved in collision, then collision will override arrival
-                if (prev_agents[agent].in_collision or prev_agents[agent].was_in_collision_already):
-                    presence_list.append( [0 , prev_agents[agent].collision_timestep[0]+1 ] )
-                else:
-                    presence_list.append( [0 , prev_agents[agent].arrival_timestep+1 ] )
-            elif  prev_agents[agent].in_collision or prev_agents[agent].was_in_collision_already:
-                presence_list.append( [0 , prev_agents[agent].collision_timestep[0]+1 ] )
-            elif  prev_agents[agent].ran_out_of_time:
-                presence_list.append( [0 , -1 ] )
+        #agents leave the scene when they arrive at the goal or run out of time.
+        for agent in range(len(prev_agents)): #iterate the agents
+            if prev_agents[agent].is_at_goal or prev_agents[agent].was_at_goal_already:
+                presence_list.append([prev_agents[agent].start_step_num, prev_agents[agent].arrival_timestep])
+            elif prev_agents[agent].ran_out_of_time:
+                presence_list.append([prev_agents[agent].start_step_num, prev_agents[agent].timeout_timestep])
+            elif prev_agents[agent].is_out_of_bounds:
+                #did not arrive and did not timeout, added in at the last timestep
+                presence_list.append([prev_agents[agent].start_step_num, prev_agents[agent].out_of_bounds_timestep])
+            else:
+                presence_list.append([prev_agents[agent].start_step_num, prev_agents[agent].step_num])
+
+
+
+
+
+            # if    prev_agents[agent].is_at_goal   or prev_agents[agent].was_at_goal_already:
+            #     #if arrived but later involved in collision, then collision will override arrival
+            #     if (prev_agents[agent].in_collision or prev_agents[agent].was_in_collision_already):
+            #         presence_list.append( [0 , prev_agents[agent].collision_timestep[0]+1 ] )
+            #     else:
+            #         presence_list.append( [0 , prev_agents[agent].arrival_timestep+1 ] )
+            # elif  prev_agents[agent].in_collision or prev_agents[agent].was_in_collision_already:
+            #     presence_list.append( [0 , prev_agents[agent].collision_timestep[0]+1 ] )
+            # elif  prev_agents[agent].ran_out_of_time:
+            #     presence_list.append( [0 , -1 ] )
            
-            
+        if test_case_index == 5:
+            print(":h")
 
         ##############################################
         overall_record['test_name'] = folder_policy_name
@@ -357,6 +369,15 @@ def main():
         overall_record['collision'] = np.array( [ agent.collision_timestep for agent in prev_agents ] )
         overall_record['trajectory']  = np.array( traj_list )
         
+        #check data invariants
+        assert(len(presence_list) == len(traj_list))
+        assert(overall_record['collision'].shape[0] == num_agents)
+        assert(overall_record['trajectory'].shape[0] == num_agents)
+        assert(overall_record['policy'].size == num_agents)
+        assert(overall_record['goal'].shape[0] == num_agents)
+
+
+
         
         ####### TXT output ######
         txt_output_list = list(output_list)
@@ -422,7 +443,7 @@ def main():
 
         overall_record_list.append( overall_record )
     
-    np.savez(    file_dir + '/logs/overall_result.npz', data=overall_record_list )
+    np.savez(    file_dir + '/logs/overall_result.npz', data=overall_record_list )        
 
     
     #fname = pkl_dir+one_env.plot_policy_name+'.pkl'

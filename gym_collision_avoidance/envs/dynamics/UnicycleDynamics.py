@@ -20,7 +20,7 @@ class UnicycleDynamics(Dynamics):
         same way. Also update the agent's turning direction (only used by CADRL).
 
         Args:
-            action (list): [delta heading angle, speed] command for this agent
+            action (list): [speed, delta heading angle] command for this agent
             dt (float): time in seconds to execute :code:`action`
     
         """

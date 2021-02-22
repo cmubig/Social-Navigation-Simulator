@@ -1,9 +1,0 @@
-.ipynb_checkpoints
-scripts/sgan/__pycache__/*
-scripts/sgan/__pycache__
-scripts/.DS_Store
-env/*
-env
-.DS_Store
-scripts/sgan/data/__pycache__/*
-scripts/sgan/data/__pycache__

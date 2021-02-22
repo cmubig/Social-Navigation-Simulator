@@ -48,7 +48,9 @@ def run_episode(env, one_env):
     done = False
     while not done:
         obs, rew, done, info = env.step([None])
-        total_reward += rew[0]
+
+        #dynamic number of agent messes with the dimension of reward, comment for now, require fix in future
+        #total_reward += rew[0]
         step += 1
 
     # After end of episode, store some statistics about the environment
@@ -86,7 +88,7 @@ def run_episode(env, one_env):
 
     env.reset()
 
-    return episode_stats, agents
+    return episode_stats, agents, one_env.active_agents_per_timestep
 
 def store_stats(df, hyperparameters, episode_stats):
     # Add a new row to the pandas DataFrame (a table of results, where each row is an episode)

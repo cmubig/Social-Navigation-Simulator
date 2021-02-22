@@ -21,7 +21,7 @@ setup(
         'moviepy',
         'pandas',
         'networkx',
-        'torch===1.2.0', #cuda compatibilty
+        'torch===1.2.0', #used 1.2 instead of 1.3 #cuda compatibilty
         'attrdict',
     ],
 )

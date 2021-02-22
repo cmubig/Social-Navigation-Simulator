@@ -19,6 +19,72 @@ from gym_collision_avoidance.envs.agent import Agent
 from gym_collision_avoidance.envs.Map import Map
 from gym_collision_avoidance.envs import test_cases as tc
 
+# Filter list by Boolean list 
+# Using itertools.compress 
+from itertools import compress
+
+
+# Policies
+from gym_collision_avoidance.envs.policies.StaticPolicy import StaticPolicy
+from gym_collision_avoidance.envs.policies.NonCooperativePolicy import NonCooperativePolicy
+# from gym_collision_avoidance.envs.policies.DRLLongPolicy import DRLLongPolicy
+from gym_collision_avoidance.envs.policies.RVOPolicy import RVOPolicy
+from gym_collision_avoidance.envs.policies.CADRLPolicy import CADRLPolicy
+from gym_collision_avoidance.envs.policies.GA3CCADRLPolicy import GA3CCADRLPolicy
+from gym_collision_avoidance.envs.policies.ExternalPolicy import ExternalPolicy
+from gym_collision_avoidance.envs.policies.LearningPolicy import LearningPolicy
+from gym_collision_avoidance.envs.policies.CARRLPolicy import CARRLPolicy
+from gym_collision_avoidance.envs.policies.LearningPolicyGA3C import LearningPolicyGA3C
+
+from gym_collision_avoidance.envs.policies.NAVIGANPolicy import NAVIGANPolicy
+from gym_collision_avoidance.envs.policies.STGCNNPolicy import STGCNNPolicy
+from gym_collision_avoidance.envs.policies.SPECPolicy import SPECPolicy
+from gym_collision_avoidance.envs.policies.SOCIALFORCEPolicy import SOCIALFORCEPolicy
+from gym_collision_avoidance.envs.policies.SLSTMPolicy import SLSTMPolicy
+from gym_collision_avoidance.envs.policies.SOCIALGANPolicy import SOCIALGANPolicy
+# from gym_collision_avoidance.envs.policies.GROUPNAVIGANPolicy import GROUPNAVIGANPolicy
+from gym_collision_avoidance.envs.policies.CVMPolicy import CVMPolicy
+
+# Dynamics
+from gym_collision_avoidance.envs.dynamics.UnicycleDynamics import UnicycleDynamics
+from gym_collision_avoidance.envs.dynamics.UnicycleDynamicsMaxTurnRate import UnicycleDynamicsMaxTurnRate
+from gym_collision_avoidance.envs.dynamics.ExternalDynamics import ExternalDynamics
+
+# Sensors
+from gym_collision_avoidance.envs.sensors.OccupancyGridSensor import OccupancyGridSensor
+from gym_collision_avoidance.envs.sensors.LaserScanSensor import LaserScanSensor
+from gym_collision_avoidance.envs.sensors.OtherAgentsStatesSensor import OtherAgentsStatesSensor
+
+
+#for generate new agents to replace old agents (dynamic number of agents)
+from master_scenario_generator import Scenario_Generator, Seeded_Scenario_Generator, Seeded_Population_Scenario_Generator, Single_Seeded_Population_Scenario_Generator, real_dataset_traj
+policy_dict = {
+    'RVO': RVOPolicy,
+    'LINEAR': NonCooperativePolicy,
+    'carrl': CARRLPolicy,
+    'external': ExternalPolicy,
+    'GA3C_CADRL': GA3CCADRLPolicy,
+    'learning': LearningPolicy,
+    'learning_ga3c': LearningPolicyGA3C,
+    'static': StaticPolicy,
+    'CADRL': CADRLPolicy,
+    'NAVIGAN' : NAVIGANPolicy,
+    'STGCNN' : STGCNNPolicy,
+    'SPEC' : SPECPolicy,
+    'SOCIALFORCE' : SOCIALFORCEPolicy,
+    'SLSTM' : SLSTMPolicy,
+    'SOCIALGAN' : SOCIALGANPolicy,
+    # 'GROUPNAVIGAN' : GROUPNAVIGANPolicy,
+    'CVM' : CVMPolicy,
+}
+
+dynamics_dict = {
+    'unicycle': UnicycleDynamics,
+    'external': ExternalDynamics,
+}
+
+
+
 class CollisionAvoidanceEnv(gym.Env):
     """ Gym Environment for multiagent collision avoidance
 
@@ -128,6 +194,13 @@ class CollisionAvoidanceEnv(gym.Env):
 
         self.perturbed_obs = None
 
+        self.active_agent_mask = None
+        self.active_agents = None
+
+        self.active_agents_per_timestep = dict()
+
+        self.replaced_agent_mask = None # agent that arrived will be removed and replace by a new agent
+        
     def step(self, actions, dt=None):
         """ Run one timestep of environment dynamics.
 
@@ -151,7 +224,222 @@ class CollisionAvoidanceEnv(gym.Env):
         - **info_dict** (*dict*): metadata that helps in training
 
         """
+        ###################
+        #Use active_agent_list as a mask to filter,  only pass the "active" agents to policy and plot
+        if self.episode_step_number == 0:
+            self.active_agent_mask = np.array( [True] * len(self.agents) )
 
+            self.replaced_agent_mask = np.array( [False] * len(self.agents) )
+
+        #print("self.episode_step_number")
+        print(self.episode_step_number)
+            
+        self.active_agents = list(compress(self.agents, self.active_agent_mask))
+        self.active_agents_per_timestep[self.episode_step_number] = set([agent.id for agent in self.active_agents])
+        #print("len(self.active_agents)")
+        #print(len(self.active_agents))
+
+
+
+        ###################
+        if dt is None:
+            dt = self.dt_nominal
+
+        self.episode_step_number += 1
+
+        # Take action
+        self._take_action(actions, dt)
+
+        self.active_agents = list(compress(self.agents, self.active_agent_mask))
+
+        # Collect rewards
+        rewards = self._compute_rewards()
+
+        # Take observation
+        next_observations = self._get_obs()
+
+        if (Config.ANIMATE_EPISODES and self.episode_step_number % self.animation_period_steps == 0) or np.any([agent.in_collision for agent in self.active_agents]):
+            plot_episode(self.agents, True, self.map, self.test_case_index,
+                circles_along_traj=Config.PLOT_CIRCLES_ALONG_TRAJ,
+                plot_save_dir=self.plot_save_dir,
+                plot_policy_name=self.plot_policy_name,
+                save_for_animation=True,
+                limits=self.plt_limits,
+                fig_size=self.plt_fig_size,
+                perturbed_obs=self.perturbed_obs,
+                show=False,
+                save=True,#)
+                active_agent_mask= self.active_agent_mask,
+                episode_step_num=self.episode_step_number)
+
+        elif Config.SHOW_EPISODE_PLOTS and self.episode_step_number % self.animation_period_steps == 0:
+            plot_episode(self.agents, False, self.map, self.test_case_index,
+                circles_along_traj=Config.PLOT_CIRCLES_ALONG_TRAJ,
+                plot_save_dir=self.plot_save_dir,
+                plot_policy_name=self.plot_policy_name,
+                save_for_animation=False,
+                limits=self.plt_limits,
+                fig_size=self.plt_fig_size,
+                perturbed_obs=self.perturbed_obs,
+                show=True,
+                save=True,#)
+                active_agent_mask= self.active_agent_mask,
+                episode_step_num=self.episode_step_number)
+
+        # Check which agents' games are finished (at goal/collided/out of time)
+        which_agents_done, game_over = self._check_which_agents_done()
+
+        which_agents_done_dict = {}
+        which_agents_learning_dict = {}
+        for i, agent in enumerate(self.agents):
+            which_agents_done_dict[agent.id] = which_agents_done[i]
+            which_agents_learning_dict[agent.id] = agent.policy.is_still_learning
+
+        
+
+        # Update active agent mask, only keep agents that is still running, and mask out any (at goal/collided/out of time) agents
+        agents_still_running = [not done for done in which_agents_done]
+
+        # agents_inside_field = self._check_which_agents_inside_field()
+
+        
+        self.active_agent_mask = self.active_agent_mask & agents_still_running
+  
+        #add agents here
+        #take in-active agents and re-add them as new agents with timestamp of now. 
+        for i, agent in enumerate(self.agents):
+
+            #if the agent is not active, and the agent haven't been replaced then read its information and add it again
+            if (not self.active_agent_mask[i]) and (not self.replaced_agent_mask[i]) :
+
+                #only if the agent arrived the goal and has enough time for newly added agent to reach goal in a straight line:
+                #if agent.is_at_goal and (Config.agent_time_out - self.dt_nominal*self.episode_step_number > agent.straight_line_time_to_reach_goal):
+
+                #agent arrived the goal or agent ran outside the field,    then, if there is enough time for newly added agent to reach goal in a straight line:
+                if (agent.is_at_goal or agent.is_out_of_bounds) and (Config.agent_time_out - self.dt_nominal*self.episode_step_number > agent.straight_line_time_to_reach_goal):
+                    agent_policy     = "LINEAR" if agent.policy.str == "NonCooperativePolicy" else agent.policy.str
+                    
+                    agent_radius     = agent.radius
+                    agent_pref_speed = agent.pref_speed
+
+                    ######respawn with new position
+                    bbox = [[0, 5], [0, 5]] #Config.PLT_LIMITS #e.g. [[-1, 6], [-1, 6]]
+                    x_min,x_max = bbox[0]
+                    y_min,y_max = bbox[1]
+
+                    # Check which agents' games are finished (at goal/collided/out of time)
+                    temp_which_agents_done, temp_game_over = self._check_which_agents_done()
+                    # Update active agent mask, only keep agents that is still running, and mask out any (at goal/collided/out of time) agents
+                    temp_agents_still_running = [not done for done in temp_which_agents_done]
+                    temp_active_agent_mask = self.active_agent_mask & temp_agents_still_running
+
+
+                    global_timeout            = int(os.environ["global_timeout"])
+                    global_experiment_number  = int(os.environ["global_experiment_number"])
+                    global_dataset_name       = os.environ["global_dataset_name"]
+                    global_population_density = float(os.environ["global_population_density"])
+
+                    respawn_scenario = None
+                    #if is experiment 1, then respawn with real start&goal from dataset, will also override
+                    if global_experiment_number ==1:
+                        respawn_scenario = real_dataset_traj( dataset_name=global_dataset_name ).pick_one( list(compress(self.agents, temp_active_agent_mask)) ,random_seed=self.episode_step_number+i*500)
+
+                    else:
+                        respawn_scenario = Single_Seeded_Population_Scenario_Generator( 0 , agent_policy, x_min,x_max, y_min, y_max,
+                                                                                        agent_pref_speed, agent_radius, 0, list(compress(self.agents, temp_active_agent_mask)), random_seed=self.episode_step_number+i*500, num_agents_override=1 ).population_random_square_edge() 
+
+
+
+                    print("RESPAWN"*15)
+                    print(respawn_scenario)
+                    agent_policy     = "LINEAR" if agent.policy.str == "NonCooperativePolicy" else agent.policy.str
+
+                    _,_, start_x, start_y, goal_x, goal_y, past_traj,_,_ = respawn_scenario
+                    agent_start      = np.array( [ start_x, start_y ] )
+                    agent_goal       = np.array( [ goal_x, goal_y ] )
+                    
+                    #agent_goal      = agent.start_global_frame
+                    #agent_start     = agent.goal_global_frame
+
+                    agent_vec_to_goal = agent_goal - agent_start
+                    agent_heading     = np.arctan2(agent_vec_to_goal[1], agent_vec_to_goal[0])
+
+                    agent_px , agent_py  = agent_start
+                    agent_gx , agent_gy  = agent_goal
+
+                    agent_dynamics_model = agent.dynamics_model
+                    agent_sensors        = agent.sensors
+
+
+
+                    number_of_agents  =  len(self.agents)+1
+                    algorithm_name    =  agent_policy
+
+##                    self.scenario=[]
+##                    if global_experiment_number == 1: #Simulate algorithm using settings from datasets! (e.g. ETH) 
+##                        
+##                        for i in range(experiment_iteration_num): #set radius from 0.2 to 0.05 to show slstm do better in low radius situation
+##                            self.scenario.append( Seeded_Scenario_Generator( self.exp_setting[0], algorithm_name, self.exp_setting[4],self.exp_setting[5], self.exp_setting[6], self.exp_setting[7] , self.exp_setting[2],
+##                                                                             0.2 , 0, num_agents_stddev=self.exp_setting[1], pref_speed_stddev=self.exp_setting[3], random_seed=i , num_agents_override=number_of_agents ).random_square_edge() )
+##
+##                    elif global_experiment_number in [2,3,4]: #population density evaluation
+##
+##                        for i in range(experiment_iteration_num):         
+##                            self.scenario.append( Seeded_Population_Scenario_Generator( global_population_density, algorithm_name, self.exp_setting[4],self.exp_setting[5], self.exp_setting[6], self.exp_setting[7], self.exp_setting[2],
+##                                                                                        0.2, 0, random_seed=i , num_agents_override=number_of_agents ).population_random_square_edge() )
+
+                    new_agent = Agent( agent_px, agent_py, agent_gx, agent_gy, agent_radius, agent_pref_speed, agent_heading, policy_dict[agent_policy], UnicycleDynamics, [OtherAgentsStatesSensor], (number_of_agents-1) )
+                    new_agent.reset( px=agent_px, py=agent_py, gx=agent_gx, gy=agent_gy, pref_speed=agent_pref_speed, radius=agent_radius, heading=agent_heading,
+                                     start_step_num= self.episode_step_number ,start_t= self.episode_step_number*self.dt_nominal)
+
+                    if global_experiment_number ==1:  new_agent.past_traj = past_traj
+                        
+                    self.agents.append( new_agent )
+
+                    # since original agent's already handled by "&" case, no need to update agent's state from active to false,
+                    # add the replaced agent as a new agent, add it to active agent mask list
+                    self.active_agent_mask = np.append(self.active_agent_mask  , [True] )
+
+                    #since this agent is replaced, update to true
+                    self.replaced_agent_mask[i] = True
+                     
+                    #add the replaced agent as a new agnet, add it to "not yet" replaced agent mask list (since it is new)
+                    self.replaced_agent_mask = np.append(self.replaced_agent_mask, [False] )
+            
+
+        
+
+        return next_observations, rewards, game_over, \
+            {
+                'which_agents_done': which_agents_done_dict,
+                'which_agents_learning': which_agents_learning_dict,
+            }
+
+    '''  ####Original step####
+    def step(self, actions, dt=None):
+        """ Run one timestep of environment dynamics.
+
+        This is the main function. An external process will compute an action for every agent
+        then call env.step(actions). The agents take those actions,
+        then we check if any agents have earned a reward (collision/goal/...).
+        Then agents take an observation of the new world state. We compute whether each agent is done
+        (collided/reached goal/ran out of time) and if everyone's done, the episode ends.
+        We return the relevant info back to the process that called env.step(actions).
+
+        Args:
+            actions (list): list of [delta heading angle, speed] commands (1 per agent in env)
+            dt (float): time in seconds to run the simulation (defaults to :code:`self.dt_nominal`)
+
+        Returns:
+        4-element tuple containing
+
+        - **next_observations** (*np array*): (obs_length x num_agents) with each agent's observation
+        - **rewards** (*list*): 1 scalar reward per agent in self.agents
+        - **game_over** (*bool*): true if every agent is done
+        - **info_dict** (*dict*): metadata that helps in training
+
+        """
+        
         if dt is None:
             dt = self.dt_nominal
 
@@ -178,15 +466,8 @@ class CollisionAvoidanceEnv(gym.Env):
                 show=False,
                 save=True)
 
-
         # Check which agents' games are finished (at goal/collided/out of time)
         which_agents_done, game_over = self._check_which_agents_done()
-
-        print("collision")
-        print(np.array( [ agent.collision_timestep for agent in self.agents ] ))
-        print(np.array( [ agent.collision_timestep for agent in self.agents ] ).shape)
-        print("arrival")
-        print(np.array( [ agent.arrival_timestep for agent in self.agents ] ))
 
         which_agents_done_dict = {}
         which_agents_learning_dict = {}
@@ -199,6 +480,7 @@ class CollisionAvoidanceEnv(gym.Env):
                 'which_agents_done': which_agents_done_dict,
                 'which_agents_learning': which_agents_learning_dict,
             }
+    '''
 
     def reset(self):
         """ Resets the environment, re-initializes agents, plots episode (if applicable) and returns an initial observation.
@@ -245,6 +527,50 @@ class CollisionAvoidanceEnv(gym.Env):
         all_actions = np.zeros((len(self.agents), num_actions_per_agent), dtype=np.float32)
 
         # Agents set their action (either from external or w/ find_next_action)
+        #print("self.active_agents[0].heading_ego_frame")
+        #print(self.active_agents[0].heading_ego_frame)
+        for agent_index, agent in enumerate(self.agents):
+            if agent.is_done:
+                continue
+            elif agent.policy.is_external:
+                all_actions[agent_index, :] = agent.policy.external_action_to_action(agent, actions[agent_index])
+            else:
+                dict_obs = None #self.observation[agent_index]
+                action_args = inspect.getfullargspec(agent.policy.find_next_action)[0]
+                if 'full_agent_list' in action_args and 'active_agent_mask' in action_args:
+                    all_actions[agent_index, :] = agent.policy.find_next_action(dict_obs, self.agents, agent_index,  full_agent_list = self.agents, active_agent_mask = self.active_agent_mask)
+                else:
+                    all_actions[agent_index, :] = agent.policy.find_next_action(dict_obs, self.agents, agent_index)
+        # After all agents have selected actions, run one dynamics update
+        for i, agent in enumerate(self.agents):
+            agent.take_action(all_actions[i,:], dt)
+
+
+    '''   #####Original#########
+    def _take_action(self, actions, dt):
+        """ Some agents' actions come externally through the actions arg, agents with internal policies query their policy here, 
+        then each agent takes a step simultaneously.
+
+        This makes it so an external script that steps through the environment doesn't need to
+        be aware of internals of the environment, like ensuring RVO agents compute their RVO actions.
+        Instead, all policies that are already trained/frozen are computed internally, and if an
+        agent's policy is still being trained, it's convenient to isolate the training code from the environment this way.
+        Or, if there's a real robot with its own planner on-board (thus, the agent should have an ExternalPolicy), 
+        we don't bother computing its next action here and just take what the actions dict said.
+
+        Args:
+            actions (dict): keyed by agent indices, each value has a [delta heading angle, speed] command.
+                Agents with an ExternalPolicy sub-class receive their actions through this dict.
+                Other agents' indices shouldn't appear in this dict, but will be ignored if so, because they have 
+                an InternalPolicy sub-class, meaning they can
+                compute their actions internally given their observation (e.g., already trained CADRL, RVO, Non-Cooperative, etc.)
+            dt (float): time in seconds to run the simulation (defaults to :code:`self.dt_nominal`)
+
+        """
+        num_actions_per_agent = 2  # speed, delta heading angle
+        all_actions = np.zeros((len(self.agents), num_actions_per_agent), dtype=np.float32)
+
+        # Agents set their action (either from external or w/ find_next_action)
         for agent_index, agent in enumerate(self.agents):
             if agent.is_done:
                 continue
@@ -257,6 +583,7 @@ class CollisionAvoidanceEnv(gym.Env):
         # After all agents have selected actions, run one dynamics update
         for i, agent in enumerate(self.agents):
             agent.take_action(all_actions[i,:], dt)
+    '''
 
     def _update_top_down_map(self):
         """ After agents have moved, call this to update the map with their new occupancies. """
@@ -332,52 +659,54 @@ class CollisionAvoidanceEnv(gym.Env):
         """
 
         # if nothing noteworthy happened in that timestep, reward = -0.01
-        rewards = self.reward_time_step*np.ones(len(self.agents))
+        rewards = self.reward_time_step*np.ones(len(self.active_agents))
         collision_with_agent, collision_with_wall, entered_norm_zone, dist_btwn_nearest_agent = \
             self._check_for_collisions()
 
-        for i, agent in enumerate(self.agents):
+        for i, agent in enumerate(self.active_agents):
             if agent.is_at_goal:
                 if agent.was_at_goal_already is False:
                     # agents should only receive the goal reward once
                     rewards[i] = self.reward_at_goal
-                    # print("Agent %i: Arrived at goal!"
+                    # #print("Agent %i: Arrived at goal!"
                           # % agent.id)
 
                 if agent.was_in_collision_already is False:
-                    if collision_with_agent[i]:
+                    if collision_with_agent[i] and (agent.time_since_collision >= agent.collision_cooldown):
                         rewards[i] = self.reward_collision_with_agent                 
                         agent.in_collision = True
+
 
                         #other agent is also collided now:
                         #self.agents[i].in_collision = True
 
-                        agent.collision_timestep = np.array( [agent.step_num] )
-                        agent.arrival_timestep = -1
-                        agent.timeout_timestep = []   
+                        #agent.collision_timestep = np.array( [agent.step_num] )
+                        # agent.arrival_timestep = -1
+                        # agent.timeout_timestep = []
+                          
             else:
                 # agents at their goal shouldn't be penalized if someone else
                 # bumps into them
                 if agent.was_in_collision_already is False:
-                    if collision_with_agent[i]:
-                        rewards[i] = self.reward_collision_with_agent                 
+                    if collision_with_agent[i] and (agent.time_since_collision >= agent.collision_cooldown):
+                        rewards[i] = self.reward_collision_with_agent
                         agent.in_collision = True
 
-                        #other agent is also collided now:
-                        #self.agents[i].in_collision = True
-
-                        # print("Agent %i: Collision with another agent!"
+                        # #print("Agent %i: Collision with another agent!"
                         #       % agent.id)
-                    elif collision_with_wall[i]:
+
+                        
+                    elif collision_with_wall[i] and (agent.time_since_collision >= agent.collision_cooldown):
                         rewards[i] = self.reward_collision_with_wall
                         agent.in_collision = True
-                        # print("Agent %i: Collision with wall!"
+
+                        # #print("Agent %i: Collision with wall!"
                               # % agent.id)
                     else:
                         # There was no collision
                         if dist_btwn_nearest_agent[i] <= Config.GETTING_CLOSE_RANGE:
                             rewards[i] = -0.1 - dist_btwn_nearest_agent[i]/2.
-                            # print("Agent %i: Got close to another agent!"
+                            # #print("Agent %i: Got close to another agent!"
                             #       % agent.id)
                         if abs(agent.past_actions[0, 1]) > self.wiggly_behavior_threshold:
                             # Slightly penalize wiggly behavior
@@ -402,17 +731,20 @@ class CollisionAvoidanceEnv(gym.Env):
             - dist_btwn_nearest_agent (list): for each agent, float closest distance to another agent
 
         """
-        collision_with_agent = [False for _ in self.agents]
-        collision_with_wall = [False for _ in self.agents]
-        entered_norm_zone = [False for _ in self.agents]
-        dist_btwn_nearest_agent = [np.inf for _ in self.agents]
+        collision_with_agent = [False for _ in self.active_agents]
+        collision_with_wall = [False for _ in self.active_agents]
+        entered_norm_zone = [False for _ in self.active_agents]
+        dist_btwn_nearest_agent = [np.inf for _ in self.active_agents]
+
+        #override to see what happens
+        #return collision_with_agent, collision_with_wall, entered_norm_zone, dist_btwn_nearest_agent
         agent_shapes = []
         agent_front_zones = []
-        agent_inds = list(range(len(self.agents)))
+        agent_inds = list(range(len(self.active_agents))) #always takes 0-7
         agent_pairs = list(itertools.combinations(agent_inds, 2))
         for i, j in agent_pairs:
-            dist_btwn = l2norm(self.agents[i].pos_global_frame, self.agents[j].pos_global_frame)
-            combined_radius = self.agents[i].radius + self.agents[j].radius
+            dist_btwn = l2norm(self.active_agents[i].pos_global_frame, self.active_agents[j].pos_global_frame)
+            combined_radius = self.active_agents[i].radius + self.active_agents[j].radius
             dist_btwn_nearest_agent[i] = min(dist_btwn_nearest_agent[i], dist_btwn - combined_radius)
             if dist_btwn <= combined_radius:
                 # Collision with another agent!
@@ -420,7 +752,7 @@ class CollisionAvoidanceEnv(gym.Env):
                 collision_with_agent[j] = True
         if Config.USE_STATIC_MAP:
             for i in agent_inds:
-                agent = self.agents[i]
+                agent = self.active_agents[i]
                 [pi, pj], in_map = self.map.world_coordinates_to_map_indices(agent.pos_global_frame)
                 mask = self.map.get_agent_map_indices([pi, pj], agent.radius)
                 # plt.figure('static map')
@@ -439,38 +771,43 @@ class CollisionAvoidanceEnv(gym.Env):
             - game_over (bool): depending on mode, True if all agents done, True if 1st agent done, True if all learning agents done
         """
 
-        #only calculate collision when in this reward section
         for agent in self.agents:
-            if (agent.arrival_timestep is None) and (agent.collision_timestep is None) and (agent.timeout_timestep is None):
-                if agent.in_collision:
-                
-                    agent.collision_timestep = np.array( [agent.step_num] )
-                    agent.arrival_timestep = -1
-                    agent.timeout_timestep = []
+            if (agent.arrival_timestep is None) and (agent.timeout_timestep is None) and (agent.out_of_bounds_timestep is None):
 
-                elif agent.ran_out_of_time:
+                if agent.ran_out_of_time:
 
                    agent.timeout_timestep = agent.step_num
                    agent.arrival_timestep = -1
-                   agent.collision_timestep = np.array( [] )                     
+                   agent.out_of_bounds_timestep = -1
                     
                 elif agent.is_at_goal:
 
                    agent.timeout_timestep = []
                    agent.arrival_timestep = agent.step_num
-                   agent.collision_timestep = np.array( [] )     
+                   agent.out_of_bounds_timestep = -1
+
+                elif agent.is_out_of_bounds:
+
+                    agent.timeout_timestep = []
+                    agent.arrival_timestep = -1
+                    agent.out_of_bounds_timestep = agent.step_num
+
+
+            # Only add collisions if the agent is not done and cooldown has expired.
+            # Prevents multiple counts when agent is in collision exactly at arrival timestep
+            if (agent.in_collision and (agent.time_since_collision >= agent.collision_cooldown) and not agent.is_done):
+                agent.collision_timestep.append(self.episode_step_number)
+
 
             #if now in collision, but previously already reached goal, then collision will override arrival
-
-
 
         at_goal_condition = np.array(
                 [a.is_at_goal for a in self.agents])
         ran_out_of_time_condition = np.array(
                 [a.ran_out_of_time for a in self.agents])
-        in_collision_condition = np.array(
-                [a.in_collision for a in self.agents])
-        which_agents_done = np.logical_or.reduce((at_goal_condition, ran_out_of_time_condition, in_collision_condition))
+        out_of_bounds_condition = np.array(
+            [a.is_out_of_bounds for a in self.agents])
+        which_agents_done = np.logical_or.reduce((at_goal_condition, ran_out_of_time_condition, out_of_bounds_condition))
         for agent_index, agent in enumerate(self.agents):
             agent.is_done = which_agents_done[agent_index]
         
@@ -486,6 +823,25 @@ class CollisionAvoidanceEnv(gym.Env):
             game_over = np.all(which_agents_done[learning_agent_inds])
         
         return which_agents_done, game_over
+
+
+    #out of field detector
+    def _check_which_agents_inside_field(self):
+        bbox = Config.PLT_LIMITS #e.g. [[-1, 6], [-1, 6]]
+        x_min,x_max = bbox[0]
+        y_min,y_max = bbox[1]
+
+        out_of_field_status = []
+        for agent in self.agents:
+            if     agent.pos_global_frame[0] < x_min or agent.pos_global_frame[0] > x_max:
+                out_of_field_status.append(False)
+            elif   agent.pos_global_frame[1] < y_min or agent.pos_global_frame[1] > y_max:
+                out_of_field_status.append(False)
+            else:
+                out_of_field_status.append(True)
+
+        #return the boolean status array, indicating which agent in within the field
+        return np.array(out_of_field_status)
 
     def _get_obs(self):
         """ Update the map now that agents have moved, have each agent sense the world, and fill in their observations 
@@ -562,9 +918,9 @@ class CollisionAvoidanceEnv(gym.Env):
         test_case_fn_args = inspect.signature(test_case_fn).parameters
         test_case_args_keys = list(test_case_args.keys())
         for key in test_case_args_keys:
-            # print("checking if {} accepts {}".format(test_case_fn, key))
+            # #print("checking if {} accepts {}".format(test_case_fn, key))
             if key not in test_case_fn_args:
-                # print("{} doesn't accept {} -- removing".format(test_case_fn, key))
+                # #print("{} doesn't accept {} -- removing".format(test_case_fn, key))
                 del test_case_args[key]
         self.test_case_fn = test_case_fn
         self.test_case_args = test_case_args

@@ -1,12 +1,16 @@
 import numpy as np
 from gym_collision_avoidance.envs.policies.InternalPolicy import InternalPolicy
 
+# Filter list by Boolean list 
+# Using itertools.compress 
+from itertools import compress
+
 class NonCooperativePolicy(InternalPolicy):
     """ Non Cooperative Agents simply drive at pref speed toward the goal, ignoring other agents. """
     def __init__(self):
         InternalPolicy.__init__(self, str="NonCooperativePolicy")
 
-    def find_next_action(self, obs, agents, i):
+    def find_next_action(self, obs, agents, agent_index, full_agent_list = None, active_agent_mask = None):
         """ Go at pref_speed, apply a change in heading equal to zero out current ego heading (heading to goal)
 
         Args:
@@ -18,5 +22,14 @@ class NonCooperativePolicy(InternalPolicy):
             np array of shape (2,)... [spd, delta_heading]
 
         """
-        action = np.array([agents[i].pref_speed, -agents[i].heading_ego_frame])
+        
+        #check if elements before index contains non active agents, if yes, remove them, thus calculate the index shift
+        before_index = np.array(active_agent_mask)[:agent_index]
+
+        #see how many non active agents are before index,  minus them calculate index shift
+        agent_index = agent_index - len( before_index[ before_index==False ] )
+
+        agents = list(compress(full_agent_list, active_agent_mask))
+
+        action = np.array([agents[agent_index].pref_speed, -agents[agent_index].heading_ego_frame])
         return action

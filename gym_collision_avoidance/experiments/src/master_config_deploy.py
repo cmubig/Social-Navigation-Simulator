@@ -1,7 +1,7 @@
-number_of_agent = 60
+number_of_agent = 100
 import os
 
-from master_scenario_generator import Scenario_Generator, Seeded_Scenario_Generator, Seeded_Population_Scenario_Generator
+from master_scenario_generator import Scenario_Generator, Seeded_Scenario_Generator, Seeded_Population_Scenario_Generator, real_dataset_traj
 
 class Master_Config(object):
     def __init__(self):
@@ -66,16 +66,14 @@ class Master_Config(object):
 
             
         #EvaluateConfig Level
-        self.MAX_NUM_AGENTS_IN_ENVIRONMENT = number_of_agent+1
         self.EVALUATE_MODE = True
         self.TRAIN_MODE = False
         self.DT = 0.1 #0.1
         self.MAX_TIME_RATIO = 3. #8.
         #Formations config Level
 
-        self.SAVE_EPISODE_PLOTS = True
-        self.SHOW_EPISODE_PLOTS = False
-        self.ANIMATE_EPISODES = True
+        self.SHOW_EPISODE_PLOTS = False #plot while sim
+        self.SAVE_EPISODE_PLOTS  = self.ANIMATE_EPISODES = False  #output gif + mp4
         self.NEAR_GOAL_THRESHOLD = 0.2
         #ETH   [[-10, 17], [-6, 16]]
         #HOTEL [[-7,7],[-13,7]]
@@ -86,7 +84,7 @@ class Master_Config(object):
         #Population [[-1,11],[-1,11]]
 
         #Motion prediction [[-10,10],[-10,10]]
-        
+
 
         self.PLT_FIG_SIZE = (10,10) #Actual hidden limit
         self.PLOT_CIRCLES_ALONG_TRAJ = False
@@ -95,9 +93,10 @@ class Master_Config(object):
         self.POLICIES_TO_TEST = ['GA3C-CADRL-10']*60 #['RVO']*number_of_agent#['STGCNN']*number_of_agent #['CADRL']*7#['NAVIGAN']*7#['RVO']*7#['GA3C-CADRL-10']*7
         self.NUM_TEST_CASES = 2 #correspond to how many letters are there
 
-        self.MAX_NUM_AGENTS_IN_ENVIRONMENT = number_of_agent+1 
-        self.MAX_NUM_OTHER_AGENTS_OBSERVED = number_of_agent
 
+        self.MAX_NUM_OTHER_AGENTS_OBSERVED = number_of_agent * 3
+        self.MAX_NUM_AGENTS_IN_ENVIRONMENT = self.MAX_NUM_OTHER_AGENTS_OBSERVED + 1
+        
         self.agent_time_out          =  global_timeout #180 seconds normal #30 motion prediction
 
 
@@ -131,8 +130,12 @@ class Scenario_Config(object):
             
             self.scenario=[]
             for i in range(experiment_iteration_num): #set radius from 0.2 to 0.05 to show slstm do better in low radius situation
-                self.scenario.append( Seeded_Scenario_Generator( self.exp_setting[0], algorithm_name, self.exp_setting[4],self.exp_setting[5], self.exp_setting[6], self.exp_setting[7] , self.exp_setting[2], 0.2 , 0, num_agents_stddev=self.exp_setting[1], pref_speed_stddev=self.exp_setting[3], random_seed=i ).random_square_edge() )
+                #old approach to gen similar dataset based on speed, num of agents of certain dataset
+                #self.scenario.append( Seeded_Scenario_Generator( self.exp_setting[0], algorithm_name, self.exp_setting[4],self.exp_setting[5], self.exp_setting[6], self.exp_setting[7] , self.exp_setting[2], 0.2 , 0, num_agents_stddev=self.exp_setting[1], pref_speed_stddev=self.exp_setting[3], random_seed=i ).random_square_edge() )
 
+                #just use the dataset's real traj
+                self.scenario.append( real_dataset_traj( dataset_name=dataset_name ).pick_start( None, algorithm_name, self.exp_setting[4],self.exp_setting[5], self.exp_setting[6], self.exp_setting[7] , self.exp_setting[2],
+                                                                                                 0.2 , 0, random_seed=i, num_agents_override= round(self.exp_setting[0]) ) )
 
         elif experiment_number == 2: #population density evaluation
             

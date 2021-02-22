@@ -5,6 +5,11 @@ from gym_collision_avoidance.envs.policies.CADRL.scripts.multi import nn_navigat
 from gym_collision_avoidance.envs import Config
 from gym_collision_avoidance.envs import util
 
+# Filter list by Boolean list 
+# Using itertools.compress 
+from itertools import compress
+
+
 class CADRLPolicy(InternalPolicy):
     """ Re-purposed from: Socially Aware Motion Planning with Deep Reinforcement Learning
 
@@ -24,7 +29,7 @@ class CADRLPolicy(InternalPolicy):
         filename="%d_agents_policy_iter_"%num_agents + str(iteration) + ".p"
         self.value_net = nn_nav.load_NN_navigation_value(file_dir, num_agents, mode, passing_side, filename=filename, ifPrint=False)
 
-    def find_next_action(self, obs, agents, i):
+    def find_next_action(self, obs, agents, agent_index, full_agent_list = None, active_agent_mask = None):
         """ Converts environment's agents representation to CADRL format, then queries NN
 
         Args:
@@ -36,7 +41,16 @@ class CADRLPolicy(InternalPolicy):
             commanded [heading delta, speed]
 
         """
-        host_agent, agent_state, other_agents_state, other_agents_actions = self.parse_agents(agents, i)
+
+        #check if elements before index contains non active agents, if yes, remove them, thus calculate the index shift
+        before_index = np.array(active_agent_mask)[:agent_index]
+
+        #see how many non active agents are before index,  minus them calculate index shift
+        agent_index = agent_index - len( before_index[ before_index==False ] )
+
+        agents = list(compress(full_agent_list, active_agent_mask))
+        
+        host_agent, agent_state, other_agents_state, other_agents_actions = self.parse_agents(agents, agent_index)
         action = self.query_and_rescale_action(host_agent, agent_state, other_agents_state, other_agents_actions)
         return action
 
@@ -77,7 +91,8 @@ class CADRLPolicy(InternalPolicy):
             # action[0] /= host_agent.pref_speed
             action[1] = util.wrap(action[1]-host_agent.heading_global_frame)
         else:
-            action = np.array([1.0, -self.heading_ego_frame])
+            #action = np.array([1.0, -self.heading_ego_frame])
+            action = np.array([1.0, -host_agent.heading_ego_frame])
         return action
 
     def convert_host_agent_to_cadrl_state(self, agent):

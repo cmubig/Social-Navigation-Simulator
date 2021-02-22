@@ -74,7 +74,7 @@ fut = model.LocPredictor(args).predictTraj(hist)
 ###hist = torch.arange(N*2*8).view(N,2,8)*1.0 #randomly generate some data in correct shape
 ##fut = model.LocPredictor(args).predictTraj(data)
 
-print(fut)
+#print(fut)
 
 
 

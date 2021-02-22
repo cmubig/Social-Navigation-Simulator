@@ -15,51 +15,51 @@ cd $DIR
 
 #################################Navigation
 #########################################################################CADRL
-python3 src/run_experiment_1.py --output_name "exp3_0.6_CADRL_RVO" --experiment_num 3 --algorithm_name ["CADRL","RVO"] --experiment_iteration 10 --timeout 60 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp3_0.6_CADRL_RVO" --experiment_num 3 --algorithm_name ["CADRL","RVO"] --experiment_iteration 3 --timeout 60 --population_density 0.6
 
-python3 src/run_experiment_1.py --output_name "exp3_0.6_CADRL_LINEAR" --experiment_num 3 --algorithm_name ["CADRL","LINEAR"] --experiment_iteration 10 --timeout 60 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp3_0.6_CADRL_LINEAR" --experiment_num 3 --algorithm_name ["CADRL","LINEAR"] --experiment_iteration 3 --timeout 60 --population_density 0.6
 
-python3 src/run_experiment_1.py --output_name "exp3_0.6_CADRL_SOCIALFORCE" --experiment_num 3 --algorithm_name ["CADRL","SOCIALFORCE"] --experiment_iteration 10 --timeout 60 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp3_0.6_CADRL_SOCIALFORCE" --experiment_num 3 --algorithm_name ["CADRL","SOCIALFORCE"] --experiment_iteration 3 --timeout 60 --population_density 0.6
 
 ########################################################################SOCIALFORCE
-python3 src/run_experiment_1.py --output_name "exp3_0.6_SOCIALFORCE_CADRL" --experiment_num 3 --algorithm_name ["SOCIALFORCE","CADRL"] --experiment_iteration 10 --timeout 60 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp3_0.6_SOCIALFORCE_CADRL" --experiment_num 3 --algorithm_name ["SOCIALFORCE","CADRL"] --experiment_iteration 3 --timeout 60 --population_density 0.6
 
-python3 src/run_experiment_1.py --output_name "exp3_0.6_SOCIALFORCE_RVO" --experiment_num 3 --algorithm_name ["SOCIALFORCE","RVO"] --experiment_iteration 10 --timeout 60 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp3_0.6_SOCIALFORCE_RVO" --experiment_num 3 --algorithm_name ["SOCIALFORCE","RVO"] --experiment_iteration 3 --timeout 60 --population_density 0.6
 
-python3 src/run_experiment_1.py --output_name "exp3_0.6_SOCIALFORCE_LINEAR" --experiment_num 3 --algorithm_name ["SOCIALFORCE","LINEAR"] --experiment_iteration 10 --timeout 60 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp3_0.6_SOCIALFORCE_LINEAR" --experiment_num 3 --algorithm_name ["SOCIALFORCE","LINEAR"] --experiment_iteration 3 --timeout 60 --population_density 0.6
 
 ########################################################################RVO
-python3 src/run_experiment_1.py --output_name "exp3_0.6_RVO_CADRL" --experiment_num 3 --algorithm_name ["RVO","CADRL"] --experiment_iteration 10 --timeout 60 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp3_0.6_RVO_CADRL" --experiment_num 3 --algorithm_name ["RVO","CADRL"] --experiment_iteration 3 --timeout 60 --population_density 0.6
 
-python3 src/run_experiment_1.py --output_name "exp3_0.6_RVO_LINEAR" --experiment_num 3 --algorithm_name ["RVO","LINEAR"] --experiment_iteration 10 --timeout 60 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp3_0.6_RVO_LINEAR" --experiment_num 3 --algorithm_name ["RVO","LINEAR"] --experiment_iteration 3 --timeout 60 --population_density 0.6
 
-python3 src/run_experiment_1.py --output_name "exp3_0.6_RVO_SOCIALFORCE" --experiment_num 3 --algorithm_name ["RVO","SOCIALFORCE"] --experiment_iteration 10 --timeout 60 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp3_0.6_RVO_SOCIALFORCE" --experiment_num 3 --algorithm_name ["RVO","SOCIALFORCE"] --experiment_iteration 3 --timeout 60 --population_density 0.6
 
 ########################################################################LINEAR
-python3 src/run_experiment_1.py --output_name "exp3_0.6_LINEAR_CADRL" --experiment_num 3 --algorithm_name ["LINEAR","CADRL"] --experiment_iteration 10 --timeout 60 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp3_0.6_LINEAR_CADRL" --experiment_num 3 --algorithm_name ["LINEAR","CADRL"] --experiment_iteration 3 --timeout 60 --population_density 0.6
 
-python3 src/run_experiment_1.py --output_name "exp3_0.6_LINEAR_RVO" --experiment_num 3 --algorithm_name ["LINEAR","RVO"] --experiment_iteration 10 --timeout 60 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp3_0.6_LINEAR_RVO" --experiment_num 3 --algorithm_name ["LINEAR","RVO"] --experiment_iteration 3 --timeout 60 --population_density 0.6
 
-python3 src/run_experiment_1.py --output_name "exp3_0.6_LINEAR_SOCIALFORCE" --experiment_num 3 --algorithm_name ["LINEAR","SOCIALFORCE"] --experiment_iteration 10 --timeout 60 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp3_0.6_LINEAR_SOCIALFORCE" --experiment_num 3 --algorithm_name ["LINEAR","SOCIALFORCE"] --experiment_iteration 3 --timeout 60 --population_density 0.6
 
 
 ##########################################
 
-python3 src/run_experiment_1.py --output_name "exp4_0.6_CADRL_RVO" --experiment_num 4 --algorithm_name ["CADRL","RVO"] --experiment_iteration 10 --timeout 60 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp4_0.6_CADRL_RVO" --experiment_num 4 --algorithm_name ["CADRL","RVO"] --experiment_iteration 3 --timeout 60 --population_density 0.6
 
-python3 src/run_experiment_1.py --output_name "exp4_0.6_CADRL_LINEAR" --experiment_num 4 --algorithm_name ["CADRL","LINEAR"] --experiment_iteration 10 --timeout 60 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp4_0.6_CADRL_LINEAR" --experiment_num 4 --algorithm_name ["CADRL","LINEAR"] --experiment_iteration 3 --timeout 60 --population_density 0.6
 
-python3 src/run_experiment_1.py --output_name "exp4_0.6_CADRL_SOCIALFORCE" --experiment_num 4 --algorithm_name ["CADRL","SOCIALFORCE"] --experiment_iteration 10 --timeout 60 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp4_0.6_CADRL_SOCIALFORCE" --experiment_num 4 --algorithm_name ["CADRL","SOCIALFORCE"] --experiment_iteration 3 --timeout 60 --population_density 0.6
 
 ########################################################################SOCIALFORCE
 
-python3 src/run_experiment_1.py --output_name "exp4_0.6_SOCIALFORCE_RVO" --experiment_num 4 --algorithm_name ["SOCIALFORCE","RVO"] --experiment_iteration 10 --timeout 60 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp4_0.6_SOCIALFORCE_RVO" --experiment_num 4 --algorithm_name ["SOCIALFORCE","RVO"] --experiment_iteration 3 --timeout 60 --population_density 0.6
 
-python3 src/run_experiment_1.py --output_name "exp4_0.6_SOCIALFORCE_LINEAR" --experiment_num 4 --algorithm_name ["SOCIALFORCE","LINEAR"] --experiment_iteration 10 --timeout 60 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp4_0.6_SOCIALFORCE_LINEAR" --experiment_num 4 --algorithm_name ["SOCIALFORCE","LINEAR"] --experiment_iteration 3 --timeout 60 --population_density 0.6
 
 ########################################################################RVO
 
-python3 src/run_experiment_1.py --output_name "exp4_0.6_RVO_LINEAR" --experiment_num 4 --algorithm_name ["RVO","LINEAR"] --experiment_iteration 10 --timeout 60 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp4_0.6_RVO_LINEAR" --experiment_num 4 --algorithm_name ["RVO","LINEAR"] --experiment_iteration 3 --timeout 60 --population_density 0.6
 
 
 ################################Motion
@@ -67,76 +67,76 @@ python3 src/run_experiment_1.py --output_name "exp4_0.6_RVO_LINEAR" --experiment
 ###############################
 ############################################################################## EXP 3
 ########################################################################CVM
-python3 src/run_experiment_1.py --output_name "exp3_0.6_CVM_SLSTM" --experiment_num 3 --algorithm_name ["CVM","SLSTM"] --experiment_iteration 10 --timeout 15 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp3_0.6_CVM_SLSTM" --experiment_num 3 --algorithm_name ["CVM","SLSTM"] --experiment_iteration 3 --timeout 15 --population_density 0.6
 
-python3 src/run_experiment_1.py --output_name "exp3_0.6_CVM_SPEC" --experiment_num 3 --algorithm_name ["CVM","SPEC"] --experiment_iteration 10 --timeout 15 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp3_0.6_CVM_SPEC" --experiment_num 3 --algorithm_name ["CVM","SPEC"] --experiment_iteration 3 --timeout 15 --population_density 0.6
 
-python3 src/run_experiment_1.py --output_name "exp3_0.6_CVM_SOCIALGAN" --experiment_num 3 --algorithm_name ["CVM","SOCIALGAN"] --experiment_iteration 10 --timeout 15 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp3_0.6_CVM_SOCIALGAN" --experiment_num 3 --algorithm_name ["CVM","SOCIALGAN"] --experiment_iteration 3 --timeout 15 --population_density 0.6
 
-python3 src/run_experiment_1.py --output_name "exp3_0.6_CVM_STGCNN" --experiment_num 3 --algorithm_name ["CVM","STGCNN"] --experiment_iteration 10 --timeout 15 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp3_0.6_CVM_STGCNN" --experiment_num 3 --algorithm_name ["CVM","STGCNN"] --experiment_iteration 3 --timeout 15 --population_density 0.6
 
 
 ########################################################################SLSTM
-python3 src/run_experiment_1.py --output_name "exp3_0.6_SLSTM_CVM" --experiment_num 3 --algorithm_name ["SLSTM","CVM"] --experiment_iteration 10 --timeout 15 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp3_0.6_SLSTM_CVM" --experiment_num 3 --algorithm_name ["SLSTM","CVM"] --experiment_iteration 3 --timeout 15 --population_density 0.6
 
-python3 src/run_experiment_1.py --output_name "exp3_0.6_SLSTM_SPEC" --experiment_num 3 --algorithm_name ["SLSTM","SPEC"] --experiment_iteration 10 --timeout 15 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp3_0.6_SLSTM_SPEC" --experiment_num 3 --algorithm_name ["SLSTM","SPEC"] --experiment_iteration 3 --timeout 15 --population_density 0.6
 
-python3 src/run_experiment_1.py --output_name "exp3_0.6_SLSTM_SOCIALGAN" --experiment_num 3 --algorithm_name ["SLSTM","SOCIALGAN"] --experiment_iteration 10 --timeout 15 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp3_0.6_SLSTM_SOCIALGAN" --experiment_num 3 --algorithm_name ["SLSTM","SOCIALGAN"] --experiment_iteration 3 --timeout 15 --population_density 0.6
 
-python3 src/run_experiment_1.py --output_name "exp3_0.6_SLSTM_STGCNN" --experiment_num 3 --algorithm_name ["SLSTM","STGCNN"] --experiment_iteration 10 --timeout 15 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp3_0.6_SLSTM_STGCNN" --experiment_num 3 --algorithm_name ["SLSTM","STGCNN"] --experiment_iteration 3 --timeout 15 --population_density 0.6
 
 
 
 ########################################################################SPEC
-python3 src/run_experiment_1.py --output_name "exp3_0.6_SPEC_CVM" --experiment_num 3 --algorithm_name ["SPEC","CVM"] --experiment_iteration 10 --timeout 15 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp3_0.6_SPEC_CVM" --experiment_num 3 --algorithm_name ["SPEC","CVM"] --experiment_iteration 3 --timeout 15 --population_density 0.6
 
-python3 src/run_experiment_1.py --output_name "exp3_0.6_SPEC_SLSTM" --experiment_num 3 --algorithm_name ["SPEC","SLSTM"] --experiment_iteration 10 --timeout 15 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp3_0.6_SPEC_SLSTM" --experiment_num 3 --algorithm_name ["SPEC","SLSTM"] --experiment_iteration 3 --timeout 15 --population_density 0.6
 
-python3 src/run_experiment_1.py --output_name "exp3_0.6_SPEC_SOCIALGAN" --experiment_num 3 --algorithm_name ["SPEC","SOCIALGAN"] --experiment_iteration 10 --timeout 15 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp3_0.6_SPEC_SOCIALGAN" --experiment_num 3 --algorithm_name ["SPEC","SOCIALGAN"] --experiment_iteration 3 --timeout 15 --population_density 0.6
 
-python3 src/run_experiment_1.py --output_name "exp3_0.6_SPEC_STGCNN" --experiment_num 3 --algorithm_name ["SPEC","STGCNN"] --experiment_iteration 10 --timeout 15 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp3_0.6_SPEC_STGCNN" --experiment_num 3 --algorithm_name ["SPEC","STGCNN"] --experiment_iteration 3 --timeout 15 --population_density 0.6
 
 ########################################################################SOCIALGAN
-python3 src/run_experiment_1.py --output_name "exp3_0.6_SOCIALGAN_CVM" --experiment_num 3 --algorithm_name ["SOCIALGAN","CVM"] --experiment_iteration 10 --timeout 15 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp3_0.6_SOCIALGAN_CVM" --experiment_num 3 --algorithm_name ["SOCIALGAN","CVM"] --experiment_iteration 3 --timeout 15 --population_density 0.6
 
-python3 src/run_experiment_1.py --output_name "exp3_0.6_SOCIALGAN_SLSTM" --experiment_num 3 --algorithm_name ["SOCIALGAN","SLSTM"] --experiment_iteration 10 --timeout 15 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp3_0.6_SOCIALGAN_SLSTM" --experiment_num 3 --algorithm_name ["SOCIALGAN","SLSTM"] --experiment_iteration 3 --timeout 15 --population_density 0.6
 
-python3 src/run_experiment_1.py --output_name "exp3_0.6_SOCIALGAN_SPEC" --experiment_num 3 --algorithm_name ["SOCIALGAN","SPEC"] --experiment_iteration 10 --timeout 15 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp3_0.6_SOCIALGAN_SPEC" --experiment_num 3 --algorithm_name ["SOCIALGAN","SPEC"] --experiment_iteration 3 --timeout 15 --population_density 0.6
 
-python3 src/run_experiment_1.py --output_name "exp3_0.6_SOCIALGAN_STGCNN" --experiment_num 3 --algorithm_name ["SOCIALGAN","STGCNN"] --experiment_iteration 10 --timeout 15 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp3_0.6_SOCIALGAN_STGCNN" --experiment_num 3 --algorithm_name ["SOCIALGAN","STGCNN"] --experiment_iteration 3 --timeout 15 --population_density 0.6
 
 ########################################################################STGCNN
-python3 src/run_experiment_1.py --output_name "exp3_0.6_STGCNN_CVM" --experiment_num 3 --algorithm_name ["STGCNN","CVM"] --experiment_iteration 10 --timeout 15 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp3_0.6_STGCNN_CVM" --experiment_num 3 --algorithm_name ["STGCNN","CVM"] --experiment_iteration 3 --timeout 15 --population_density 0.6
 
-python3 src/run_experiment_1.py --output_name "exp3_0.6_STGCNN_SLSTM" --experiment_num 3 --algorithm_name ["STGCNN","SLSTM"] --experiment_iteration 10 --timeout 15 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp3_0.6_STGCNN_SLSTM" --experiment_num 3 --algorithm_name ["STGCNN","SLSTM"] --experiment_iteration 3 --timeout 15 --population_density 0.6
 
-python3 src/run_experiment_1.py --output_name "exp3_0.6_STGCNN_SPEC" --experiment_num 3 --algorithm_name ["STGCNN","SPEC"] --experiment_iteration 10 --timeout 15 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp3_0.6_STGCNN_SPEC" --experiment_num 3 --algorithm_name ["STGCNN","SPEC"] --experiment_iteration 3 --timeout 15 --population_density 0.6
 
-python3 src/run_experiment_1.py --output_name "exp3_0.6_STGCNN_SOCIALGAN" --experiment_num 3 --algorithm_name ["STGCNN","SOCIALGAN"] --experiment_iteration 10 --timeout 15 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp3_0.6_STGCNN_SOCIALGAN" --experiment_num 3 --algorithm_name ["STGCNN","SOCIALGAN"] --experiment_iteration 3 --timeout 15 --population_density 0.6
 
 
 
 ##############################################################################
-python3 src/run_experiment_1.py --output_name "exp4_0.6_CVM_SLSTM" --experiment_num 4 --algorithm_name ["CVM","SLSTM"] --experiment_iteration 10 --timeout 15 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp4_0.6_CVM_SLSTM" --experiment_num 4 --algorithm_name ["CVM","SLSTM"] --experiment_iteration 3 --timeout 15 --population_density 0.6
 
-python3 src/run_experiment_1.py --output_name "exp4_0.6_CVM_SPEC" --experiment_num 4 --algorithm_name ["CVM","SPEC"] --experiment_iteration 10 --timeout 15 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp4_0.6_CVM_SPEC" --experiment_num 4 --algorithm_name ["CVM","SPEC"] --experiment_iteration 3 --timeout 15 --population_density 0.6
 
-python3 src/run_experiment_1.py --output_name "exp4_0.6_SLSTM_SPEC" --experiment_num 4 --algorithm_name ["SLSTM","SPEC"] --experiment_iteration 10 --timeout 15 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp4_0.6_SLSTM_SPEC" --experiment_num 4 --algorithm_name ["SLSTM","SPEC"] --experiment_iteration 3 --timeout 15 --population_density 0.6
 
 ##########################################################################
-python3 src/run_experiment_1.py --output_name "exp4_0.6_SOCIALGAN_CVM" --experiment_num 4 --algorithm_name ["SOCIALGAN","CVM"] --experiment_iteration 10 --timeout 15 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp4_0.6_SOCIALGAN_CVM" --experiment_num 4 --algorithm_name ["SOCIALGAN","CVM"] --experiment_iteration 3 --timeout 15 --population_density 0.6
 
-python3 src/run_experiment_1.py --output_name "exp4_0.6_SOCIALGAN_SLSTM" --experiment_num 4 --algorithm_name ["SOCIALGAN","SLSTM"] --experiment_iteration 10 --timeout 15 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp4_0.6_SOCIALGAN_SLSTM" --experiment_num 4 --algorithm_name ["SOCIALGAN","SLSTM"] --experiment_iteration 3 --timeout 15 --population_density 0.6
 
-python3 src/run_experiment_1.py --output_name "exp4_0.6_SOCIALGAN_SPEC" --experiment_num 4 --algorithm_name ["SOCIALGAN","SPEC"] --experiment_iteration 10 --timeout 15 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp4_0.6_SOCIALGAN_SPEC" --experiment_num 4 --algorithm_name ["SOCIALGAN","SPEC"] --experiment_iteration 3 --timeout 15 --population_density 0.6
 
-python3 src/run_experiment_1.py --output_name "exp4_0.6_SOCIALGAN_STGCNN" --experiment_num 4 --algorithm_name ["SOCIALGAN","STGCNN"] --experiment_iteration 10 --timeout 15 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp4_0.6_SOCIALGAN_STGCNN" --experiment_num 4 --algorithm_name ["SOCIALGAN","STGCNN"] --experiment_iteration 3 --timeout 15 --population_density 0.6
 
 #########
-python3 src/run_experiment_1.py --output_name "exp4_0.6_STGCNN_CVM" --experiment_num 4 --algorithm_name ["STGCNN","CVM"] --experiment_iteration 10 --timeout 15 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp4_0.6_STGCNN_CVM" --experiment_num 4 --algorithm_name ["STGCNN","CVM"] --experiment_iteration 3 --timeout 15 --population_density 0.6
 
-python3 src/run_experiment_1.py --output_name "exp4_0.6_STGCNN_SLSTM" --experiment_num 4 --algorithm_name ["STGCNN","SLSTM"] --experiment_iteration 10 --timeout 15 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp4_0.6_STGCNN_SLSTM" --experiment_num 4 --algorithm_name ["STGCNN","SLSTM"] --experiment_iteration 3 --timeout 15 --population_density 0.6
 
-python3 src/run_experiment_1.py --output_name "exp4_0.6_STGCNN_SPEC" --experiment_num 4 --algorithm_name ["STGCNN","SPEC"] --experiment_iteration 10 --timeout 15 --population_density 0.6
+python3 src/run_experiment_1.py --output_name "exp4_0.6_STGCNN_SPEC" --experiment_num 4 --algorithm_name ["STGCNN","SPEC"] --experiment_iteration 3 --timeout 15 --population_density 0.6
 
 
