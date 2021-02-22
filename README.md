@@ -14,11 +14,12 @@ This simulator is developed based on the original work from [here](https://githu
 
 This repo also contains the trained policy for the SA-CADRL paper (referred to as CADRL here) from the proceeding paper: Y. Chen, M. Everett, M. Liu, and J. P. How. “Socially Aware Motion Planning with Deep Reinforcement Learning.” IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS). Vancouver, BC, Canada, Sept. 2017. [Link to Paper](https://arxiv.org/abs/1703.08862)  
 
-Social Force Implementation modified from [here](https://github.com/svenkreiss/socialforce)
-
-Social Force Model
+Social Force Model  
 Helbing, D., & Molnar, P. (1995). Social force model for pedestrian dynamics. Physical review E, 51(5), 4282.
 [link to paper](https://arxiv.org/abs/cond-mat/9805244)
+
+**Implementation References**  
+Social Force Implementation modified from [here](https://github.com/svenkreiss/socialforce)
 
 ---
 
