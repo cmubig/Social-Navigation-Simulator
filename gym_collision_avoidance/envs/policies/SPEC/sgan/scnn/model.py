@@ -1,16 +1,12 @@
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-try:
-    import gym_collision_avoidance.envs.policies.SPEC.sgan.scnn.utils as utils
-except:
-    import scnn.utils as utils
+
+import scnn.utils as utils
 
 from math import ceil, cos, sin, atan2, pi
 import numpy as np
-
 
 # weight_init = [ [ 0, 0],
 #     [-1, 1], [-2, 2],
@@ -22,6 +18,11 @@ import numpy as np
 #     [ 1, 1], [ 2, 2],
 #     [ 0, 1], [ 0, 2] ]
 # weight_init = 1.0*torch.tensor(weight_init).view(-1,2,1)
+
+
+
+seed = 1
+np.random.seed(seed)
 
 weight_init = [ [[1.5,0],[1,0]],
                 [[1,0],[1.5,0]],
@@ -43,6 +44,9 @@ weight_init = 1.0*torch.tensor(weight_init).float().transpose(1,2)
 xy = [-5,-3,-1.8,-1,-0.6,-0.4,0,0.4,0.6,1,1.8,3,5]
 xy = [-3,-1.8,-1,-0.6,-0.4,0,0.4,0.6,1,1.8,3]
 xy = [-2,-.8,0,.8,2]
+xy = [-2.5,-2.0,-1.5,-1.0,-0.5,0,0.5,1.0,1.5,2.0,2.5] # uniform
+xy = [-2.0, -1, 0, 1, 2] # uniform
+xy = [-5.5, -2.75, 0, 2.75, 5.5] # uniform
 loc = np.array(np.meshgrid(xy, xy)).T.reshape(-1,2)
 
 n_tht = 4
@@ -55,21 +59,19 @@ vec *= 1/4
 
 weight_init = np.zeros([len(loc)*n_tht,2,2])
 for i in range(len(loc)):
-    weight_init[i*n_tht:(i+1)*n_tht,0,:] = loc[i][0]+vec[:,0,:]
-    weight_init[i*n_tht:(i+1)*n_tht,1,:] = loc[i][1]+vec[:,1,:]
+    weight_init[i*n_tht:(i+1)*n_tht,0,:] = loc[i][0]+vec[:,0,:]+np.random.random([4,1])
+    weight_init[i*n_tht:(i+1)*n_tht,1,:] = loc[i][1]+vec[:,1,:]+np.random.random([4,1])
 
-weight_init = torch.tensor(weight_init)
+weight_init = torch.tensor(weight_init) + torch.normal(0,.05,size=weight_init.shape)
 
-''' ... '''
-seed = 1
+''' random generation '''
 distance_bound = 6
-n_pattern = 5
+n_pattern = 100
 len_min, len_max = 0.3, 0.9 # meter per 0.4sec
 
 weight_init = np.empty([n_pattern,2,2])
 import scipy.stats
-sigma = 2
-np.random.seed(seed)
+sigma = 4
 weight_init[:,:,0] = scipy.stats.truncnorm.rvs( -distance_bound/sigma, distance_bound/sigma, loc=0, scale=sigma, size=[n_pattern,2] )
 # weight_init[:,:,0] = np.random.uniform(-distance_bound,distance_bound,size=[n_pattern,2])
 weight_init[:,:,1] = weight_init[:,:,0]
@@ -145,12 +147,9 @@ class LocPredictor(nn.Module):
             th = F.max_pool1d( self.actv(self.t_conv[i](th)) , self.ag.targ_pool_size[i] ,ceil_mode=True)
         th = th.view(len(th), -1)
         for i in range(len(self.c_conv)):
-            # try:
             ch = F.max_pool1d( self.actv(self.c_conv[i](ch)) , self.ag.cont_pool_size[i] ,ceil_mode=True).float()
-            # except:
-            #     print(i,ch.shape)
-            #     raise Exception('..')
         ch = ch.view(len(ch), -1)
+        ch = F.softmax(ch) # softmax enforces probablity distribution property
         return (th,ch)
 
 
@@ -170,6 +169,7 @@ class LocPredictor(nn.Module):
             x = F.dropout(F.leaky_relu(self.fc[i](x)),p=self.p)
         x = self.fc[-1](x)
         return x
+
 
     def predictTraj(self,hist,ei=None):
         if ei is None: ei = [0,len(hist)]
@@ -228,7 +228,10 @@ class LocPredictor(nn.Module):
         targ_hist = torch.stack(targ_hist)
         cont_hist = torch.cat(cont_hist,dim=0)
         pred = self.forward(targ_hist, cont_hist, end_idx)
-        netLoc_list = utils.infLoc(pred,n_guess,coef)
+        netLoc_list = []
+        for guess_i in range(n_guess):
+            netLoc_list.append(utils.infLoc(pred,1,coef)[0])
+        netLoc_list = torch.stack(netLoc_list)
 
         output = []
         for netLoc in netLoc_list:
@@ -299,7 +302,7 @@ class L2Dist1d(nn.Module): # learning kerel seprately for x and y could save wei
         #     print("context conv[0] init.",self.weight.data.shape,self.weight.data.view(-1,2))
         # if self.n_ch==2 and self.ker_size==2 and self.n_ker==13:
         if self.n_ch==2 and self.ker_size==2 and self.n_ker==len(weight_init):
-            self.weight.data = weight_init[:] + torch.normal(0,.002,size=self.weight.shape)
+            self.weight.data = weight_init[:]
             print("context conv[0] init.",self.weight.data.shape)
         else:
             self.weight.data.uniform_(-1, 1)
@@ -340,6 +343,3 @@ class L2Dist1d(nn.Module): # learning kerel seprately for x and y could save wei
     #     batch_size, _, in_seq_len = shape
     #     out_seq_len = in_seq_len+1-self.ker_size
     #     x_unf = torch.nn.functional.unfold(x.view(-1, self.n_ch, in_seq_len,1),(self.ker_size,1)).transpose(1,2)
-    #     out = x_unf.matmul(self.weight.view(self.n_ker,-1).t()).transpose(1,2).view(-1, self.n_ker, out_seq_len)
-    #     out = out+self.bias.view(-1,1)
-    #     return out

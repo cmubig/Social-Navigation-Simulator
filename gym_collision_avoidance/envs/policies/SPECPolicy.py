@@ -7,6 +7,13 @@ import numpy as np
 from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
 
+#sys.path.insert(1, "../envs/policies/SPEC/sgan/")
+
+sys.path.append("../envs/policies/SPEC/sgan/")
+
+import scnn.model as model
+
+
 import glob
 import torch.distributions.multivariate_normal as torchdist
 
@@ -14,8 +21,10 @@ from gym_collision_avoidance.envs.policies.InternalPolicy import InternalPolicy
 from gym_collision_avoidance.envs import Config
 from gym_collision_avoidance.envs.util import *
 
-import gym_collision_avoidance.envs.policies.SPEC.sgan.scnn.model as model
-import gym_collision_avoidance.envs.policies.SPEC.sgan.scnn.utils as utils
+
+
+
+print(os.getcwd())
 
 import copy
 import argparse
@@ -116,6 +125,8 @@ class parameters():
         self.n_sample        = 20
         self.coef            = 1.000000001
 
+        print(os.getcwd())
+        
         
 class SPECPolicy(InternalPolicy):
     def __init__(self):
@@ -125,6 +136,9 @@ class SPECPolicy(InternalPolicy):
         self.near_goal_threshold = 0.5
         
         self.is_init = False
+
+        self.model = np.load("../envs/policies/SPEC/sgan/univ_best_1.npy",allow_pickle=True)[0]
+
 
         self.args = parameters()
             
@@ -385,8 +399,8 @@ class SPECPolicy(InternalPolicy):
 ##            print("after observation_x_input")
 ##            print(combined_history_x)        
 
-        observation_x_input = combined_history_x - combined_history_x[agent_index,0]#observation_x_input[:,0][:,None]
-        observation_y_input = combined_history_y - combined_history_y[agent_index,0]#observation_y_input[:,0][:,None]
+        observation_x_input = combined_history_x #- combined_history_x[agent_index,0]#observation_x_input[:,0][:,None]
+        observation_y_input = combined_history_y #- combined_history_y[agent_index,0]#observation_y_input[:,0][:,None]
 
 
         #if only target agent present, no other agent exist in observation
@@ -412,8 +426,9 @@ class SPECPolicy(InternalPolicy):
             
         
         data = torch.from_numpy(np.transpose(np.array( observation_input ).astype(np.float32), (1, 2, 0)))
-        fut = model.LocPredictor(self.args).predictTraj(data)
-        prediction = np.transpose(fut.detach().numpy() , ( 0,2,1 ) )
+        #fut = model.LocPredictor(self.args).predictTraj(data)
+        fut = self.model.predictTraj(data.to("cuda"))
+        prediction = np.transpose(fut.detach().cpu().numpy() , ( 0,2,1 ) )
         #print("FULL observation_input")
         #print(np.transpose(np.array( observation_input ).astype(np.float32), (1, 2, 0)))
         #print("FULL prediction")
@@ -428,7 +443,7 @@ class SPECPolicy(InternalPolicy):
         
 
         prediction_index = 5 #3 better in 10x10 #2 original test
-        self.next_waypoint = agents[agent_index].pos_global_frame + prediction[agent_index][prediction_index]
+        self.next_waypoint = prediction[agent_index][prediction_index] #agents[agent_index].pos_global_frame + prediction[agent_index][prediction_index]
         #print(next_waypoint)
 
         

@@ -1,7 +1,9 @@
-
 import os
 import torch
 import numpy as np
+import torch.nn as nn
+import torch.nn.functional as F
+
 import matplotlib.pyplot as plt
 import os.path
 
@@ -131,7 +133,7 @@ def getBestSample(fut,pred,useAde=1):
     return pred[ idx, torch.arange(len(idx)) ]
 
 
-def getLoss(futLoc,pred):
+def getPdf(futLoc,pred):
     # https://mathworld.wolfram.com/BivariateNormalDistribution.html
     sx, sy, corr = torch.exp(pred[:,2]), torch.exp(pred[:,3]), torch.tanh(pred[:,4])
 
@@ -144,13 +146,36 @@ def getLoss(futLoc,pred):
     numer = torch.exp(-z/(2*negRho)) # Numerator
     denom = 2 * np.pi * (sxsy * torch.sqrt(negRho))+_eps # Normalization factor
     pdf = numer/denom
-    loss = -torch.log(torch.clamp(pdf, min=_eps))
+    pdf = torch.clamp(pdf, min=_eps)
 
-    return loss[~torch.isnan(loss)].mean()
-    # return loss.mean()
+    return pdf
 
+
+def getLoss(futLoc,pred):
+    if pred.shape[1]==5:
+        loss = -torch.log( getPdf(futLoc,pred) )
+        return loss[~torch.isnan(loss)].mean()
+    else:
+        k0 = torch.sigmoid(pred[:,10])
+        loss = -torch.log( k0*getPdf(futLoc,pred[:,:5]) + (1-k0)*getPdf(futLoc,pred[:,5:10]) )
+        return loss[~torch.isnan(loss)].mean()
+
+def getMeanCov(pred):
+    mean = pred[:,0:2]
+    sx, sy, corr = torch.exp(pred[:,2]), torch.exp(pred[:,3]), torch.tanh(pred[:,4])
+    cov_xy = corr*sx*sy
+    cov = torch.Tensor(len(pred),2,2).to(pred.device)
+    cov[:,0,0], cov[:,1,1] = (sx**2+_tau)*_coef, (sy**2+_tau)*_coef
+    cov[:,0,1], cov[:,1,0] = cov_xy, cov_xy
+    return mean, cov
 
 def infLoc(pred,n=1,coef=1.0):
+    if pred.shape[1]!=5:
+        batch_size = pred.shape[0]
+        k0 = torch.sigmoid(pred[:,10]).to(cpu)
+        _idx = [range(batch_size),(torch.rand([batch_size]) < k0).int().tolist()]
+        pred = pred[:,:10].view(-1,2,5)[_idx]
+    # mean, cov = getMeanCov(pred) # to replace the next 6 lines
     mean = pred[:,0:2]
     sx, sy, corr = torch.exp(pred[:,2]), torch.exp(pred[:,3]), torch.tanh(pred[:,4])
     cov_xy = corr*sx*sy
@@ -207,16 +232,52 @@ def plot_trainBatch(b,tp=None):
     end_idx = b[2]
     plotBatchTraj(th,tf,ch,cf,tp,end_idx)
 
-def plot_valBatch(ei,hist,fut=None,pred=None,fn='val_',num=None):
+def plot_valBatch(ei,hist,fut=None,pred=None,fn='val_',num=None,amount=0.3):
     for i in range(len(ei)-1):
         h = hist[ei[i]:ei[i+1]]
         f = None if fut is None else fut[ei[i]:ei[i+1]]
-        p = None if pred is None else pred[ei[i]:ei[i+1]]
         print('\r',i,end=' ')
-        plotTraj2(h, f, p, fn=fn+str(i), path="./plots/")
+        if (pred is not None and len(pred.shape)==4):
+            p = None if pred is None else pred[:,ei[i]:ei[i+1]]
+            plotTraj3(h, f, p, fn=fn+str(i), path="./plots/",amount=amount)
+        else:
+            p = None if pred is None else pred[ei[i]:ei[i+1]]
+            plotTraj2(h, f, p, fn=fn+str(i), path="./plots/")
         if num is not None and i>=num: break
     print('.'+fn)
 
+def lighten_color(color, amount=0.3):
+    import matplotlib.colors as mc
+    import colorsys
+    c = colorsys.rgb_to_hls(*mc.to_rgb(color))
+    return colorsys.hls_to_rgb(c[0], 1 - amount * (1 - c[1]), c[2])
+
+def plotTraj3(hist_traj_list, fut_traj_list=None, pred_list_20=None, fn="000", path="./plots/", amount=0.3):
+    n_ped, n_channel, hist_len = hist_traj_list.shape # n_channel is 2
+    # plt.ion() # plt.show()
+    plt.clf()
+    if torch.is_tensor(hist_traj_list): hist_traj_list = hist_traj_list.numpy()
+    if torch.is_tensor(fut_traj_list): fut_traj_list = fut_traj_list.numpy()
+    for i in range(n_ped):
+        _c = lighten_color('C'+str(i%10),amount)
+        for j in range(len(pred_list_20)):
+            pred_list = pred_list_20[j]
+            plt.plot(np.append(hist_traj_list[i,0,-1],pred_list[i,0,:]),np.append(hist_traj_list[i,1,-1],pred_list[i,1,:]),':*',color=_c)
+    for i in range(n_ped):
+        plt.plot(hist_traj_list[i,0,:],hist_traj_list[i,1,:],'.-',color='C'+str(i%10))
+        plt.plot(hist_traj_list[i,0,-1],hist_traj_list[i,1,-1],'*',color='C'+str(i%10))
+    for i in range(n_ped):
+        if fut_traj_list is not None:
+            # plt.plot(fut_traj_list[i,0,:],fut_traj_list[i,1,:],':.',color='C'+str(i%10))
+            plt.plot(np.append(hist_traj_list[i,0,-1],fut_traj_list[i,0,:]),np.append(hist_traj_list[i,1,-1],fut_traj_list[i,1,:]),':.',color='C'+str(i%10))
+    for i in range(n_ped):
+        best_sample_id = np.linalg.norm(pred_list_20[:,i]-fut_traj_list[i],axis=1).mean(axis=1).argmin()
+        for j in range(len(pred_list_20)):
+            if j!=best_sample_id: continue
+            pred_list = pred_list_20[j]
+            plt.plot(np.append(hist_traj_list[i,0,-1],pred_list[i,0,:]),np.append(hist_traj_list[i,1,-1],pred_list[i,1,:]),':*',color='C'+str(i%10))
+    plt.axis("equal")
+    plt.savefig(path+fn+".png")
 
 
 def save_model(predictor,fn):
@@ -290,7 +351,11 @@ def plot_err(err,ade_t,fde_t,fn):
     plt.legend()
     plt.savefig("./plots/err_"+fn+".png")
 
-def remap(t):
+def remap(t,scale=1):
+    t -= t.min()
+    t /= t.max()
+    t = t*2*scale-scale
+    t = torch.tanh(t)
     t -= t.min()
     t /= t.max()
     return t*2-1
@@ -302,16 +367,16 @@ def heat2rgb(t):
     b = clamp(1.5 - abs(2.0*t+1.0))
     return (r,g,b)
 
-def plotWeights(P, W=None, targ_traj=None, Traj=None, fn="000", path="./plots/"):
-    # plt.ion() # plt.show()
+def plotWeights(P, W=None, targ_traj=None, Traj=None, fn="000", path="./plots/", lim=None, _c=None,_a=None):
     plt.clf()
+    fig = plt.figure(figsize=[8,8])
     plt.plot(0,0,"^")
-    if torch.is_tensor(P): P = P.numpy()
+    if torch.is_tensor(P): P = P.numpy().copy()
     plt.plot([np.min(P[:,1,:]),np.max(P[:,1,:])],[np.min(P[:,0,:]),np.max(P[:,0,:])],'w.')
     if W is None: W = -np.ones(len(P)) # np.arange(len(P))/len(P)*2-1# W = np.random.random(len(P))
     for (p,w) in zip(P,W):
         p[:,1]-=p[:,0]
-        plt.arrow(p[1,0], p[0,0], p[1,1], p[0,1], length_includes_head=True, color=heat2rgb(w), width=.03)
+        plt.arrow(p[1,0], p[0,0], p[1,1], p[0,1], length_includes_head=True, color=heat2rgb(w) if _c is None else _c, alpha=1.0 if _a is None else _a, width=.03)
     if targ_traj is not None:
         if torch.is_tensor(targ_traj): targ_traj = targ_traj.numpy()
         plt.plot(targ_traj[1,:],targ_traj[0,:],'^-',color='C0')
@@ -321,6 +386,6 @@ def plotWeights(P, W=None, targ_traj=None, Traj=None, fn="000", path="./plots/")
         for i,traj in enumerate(Traj):
             plt.plot(traj[1,:],traj[0,:],'.-',color='C'+str((i+1)%10))
             plt.plot(traj[1,-1],traj[0,-1],'o',color='C'+str((i+1)%10))
-    plt.axis("equal")
-    plt.show()
+    if lim is None: plt.axis("equal")
+    else: plt.xlim(lim[0],lim[1]); plt.ylim([lim[2],lim[3]])
     plt.savefig(path+fn+".png")

@@ -51,11 +51,11 @@ cd $DIR
 #python3 src/run_experiment_1.py --output_name "exp3_0.3_CVM_SLSTM" --experiment_num 3 --algorithm_name ["CVM","SLSTM"] --experiment_iteration 2 --timeout 10 --population_density 0.3
 
 
-#python3 src/run_experiment_1.py --output_name "exp3_0.3_SOCIALGAN_STGCNN" --experiment_num 4 --algorithm_name ["SOCIALGAN","STGCNN"] --experiment_iteration 3 --timeout 60 --population_density 0.3
+python3 src/run_experiment_1.py --output_name "exp4_0.2_CADRL_SPEC" --experiment_num 4 --algorithm_name ["CADRL","SPEC"] --experiment_iteration 3 --timeout 30 --population_density 0.2
 
 #SOCIALGAN STGCNN
 
-python3 src/run_experiment_1.py --output_name "exp2_0.3_CVM" --experiment_num 2 --algorithm_name "CVM" --experiment_iteration 2 --timeout 20 --population_density 0.3
+#python3 src/run_experiment_1.py --output_name "exp2_0.3_CVM" --experiment_num 2 --algorithm_name "CVM" --experiment_iteration 2 --timeout 20 --population_density 0.3
 
 #TESTING 
 #SPEC SLSTM CVM
