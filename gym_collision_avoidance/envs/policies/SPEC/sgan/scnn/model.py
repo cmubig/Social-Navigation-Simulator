@@ -1,7 +1,7 @@
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
 
 import scnn.utils as utils
 
@@ -241,7 +241,7 @@ class LocPredictor(nn.Module):
         return torch.stack(output)
 
 
-    def predictTrajSample(self,hist,ei):
+    def predictTrajSample(self,hist,ei=None):
         if ei is None: ei = [0,len(hist)]
         n_traj, n_scene, hist_len, fut_len, n_guess, n_sample = len(hist), len(ei)-1, self.ag.hist_len, self.ag.fut_len, self.ag.n_guess, self.ag.n_sample
         Hist = torch.stack([hist])
@@ -343,3 +343,6 @@ class L2Dist1d(nn.Module): # learning kerel seprately for x and y could save wei
     #     batch_size, _, in_seq_len = shape
     #     out_seq_len = in_seq_len+1-self.ker_size
     #     x_unf = torch.nn.functional.unfold(x.view(-1, self.n_ch, in_seq_len,1),(self.ker_size,1)).transpose(1,2)
+    #     out = x_unf.matmul(self.weight.view(self.n_ker,-1).t()).transpose(1,2).view(-1, self.n_ker, out_seq_len)
+    #     out = out+self.bias.view(-1,1)
+    #     return out

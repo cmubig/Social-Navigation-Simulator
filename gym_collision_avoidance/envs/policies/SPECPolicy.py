@@ -426,8 +426,10 @@ class SPECPolicy(InternalPolicy):
             
         
         data = torch.from_numpy(np.transpose(np.array( observation_input ).astype(np.float32), (1, 2, 0)))
-        #fut = model.LocPredictor(self.args).predictTraj(data)
-        fut = self.model.predictTraj(data.to("cuda"))
+
+       #fut = self.model.predictTraj(data.to("cuda"))
+
+        fut = self.model.predictTrajSample(data.to("cuda"))[0] ## take the first sample
         prediction = np.transpose(fut.detach().cpu().numpy() , ( 0,2,1 ) )
         #print("FULL observation_input")
         #print(np.transpose(np.array( observation_input ).astype(np.float32), (1, 2, 0)))
