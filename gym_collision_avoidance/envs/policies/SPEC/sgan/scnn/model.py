@@ -204,7 +204,9 @@ class LocPredictor(nn.Module):
         return pred
 
 
-    def predictNextLoc(self,hist,ei,n_guess,coef):
+    def predictNextLoc(self,hist,ei=None,n_guess=None,coef=1):
+        if ei is None: ei = [0,len(hist)]
+        if n_guess is None: n_guess = 1
         n_traj, n_scene, hist_len, fut_len, = len(hist), len(ei)-1, self.ag.hist_len, self.ag.fut_len
         _d = hist.device
         Bias, Rot = torch.Tensor(n_traj,2).to(_d), torch.Tensor(n_traj,2,2).to(_d)

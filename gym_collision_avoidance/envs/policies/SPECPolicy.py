@@ -429,8 +429,9 @@ class SPECPolicy(InternalPolicy):
 
        #fut = self.model.predictTraj(data.to("cuda"))
 
-        fut = self.model.predictTrajSample(data.to("cuda"))[0] ## take the first sample
-        prediction = np.transpose(fut.detach().cpu().numpy() , ( 0,2,1 ) )
+        #fut = self.model.predictTrajSample(data.to("cuda"))[0] ## take the first sample
+        fut = self.model.predictNextLoc(data.to("cuda"))[0,:,:,-1]
+        prediction = fut.detach().cpu().numpy() #np.transpose(fut.detach().cpu().numpy() , ( 0,2,1 ) )
         #print("FULL observation_input")
         #print(np.transpose(np.array( observation_input ).astype(np.float32), (1, 2, 0)))
         #print("FULL prediction")
@@ -443,9 +444,7 @@ class SPECPolicy(InternalPolicy):
         print("prediction")
         print(prediction[agent_index])
         
-
-        prediction_index = 5 #3 better in 10x10 #2 original test
-        self.next_waypoint = prediction[agent_index][prediction_index] #agents[agent_index].pos_global_frame + prediction[agent_index][prediction_index]
+        self.next_waypoint = prediction[agent_index]#[prediction_index] #agents[agent_index].pos_global_frame + prediction[agent_index][prediction_index]
         #print(next_waypoint)
 
         
@@ -464,7 +463,7 @@ class SPECPolicy(InternalPolicy):
 
     
 
-        vel_global_frame = (( (prediction[agent_index][prediction_index])/(prediction_index+1))/4) / agents[agent_index].dt_nominal
+        vel_global_frame = (( goal_direction)/4) / agents[agent_index].dt_nominal
 
         speed_global_frame = np.linalg.norm(vel_global_frame) 
         print("calc speed")
