@@ -2,8 +2,8 @@
 
 <img src="docs/_static/combo.gif" alt="Agents spelling ``CADRL''">
 
-A social navigation simulator for simulating a more realistic pedestrian crowd, with
-various settings and algorithms available to generate dense and rare crowd scenarios.
+**A social navigation simulator for simulating a more realistic pedestrian crowd, with
+various settings and algorithms available to generate dense and rare crowd scenarios.**
 
 This version of simulator addtionally provides the following features, based on the original version of simulator:  
 
