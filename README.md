@@ -14,6 +14,7 @@ This version of simulator addtionally provides the following features, based on 
 - Collision timeout and resume ( Collided agents will halt their action for N seconds )
 - Agents can be easily configured to use different social navigation algorithms as their policies. 
   (e.g. CADRL vs Socialforce )
+- Output agents trajectories during simulation, in the format of datasets such as ETH,ZARA1,ZARA2. 
 
 
 ---
@@ -116,7 +117,7 @@ Mohamed, A., Qian, K., Elhoseiny, M., & Claudel, C. (2020). Social-stgcnn: A soc
 Schöller, C., Aravantinos, V., Lay, F., & Knoll, A. (2020). What the constant velocity model can teach us about pedestrian motion prediction. IEEE Robotics and Automation Letters, 5(2), 1696-1703.  
 [link to paper](https://ieeexplore.ieee.org/abstract/document/8972605?casa_token=5Eby3flWY1IAAAAA:sjTaJbAjP_dSKMA6kDT21HA6fTdyF1ucqWC9LeW-eYk45bDPeYR9BobApeI74UPL8W8VgwuYfg)
 
-**Social-PEC (SPEC)**
+**Social-PEC (SPEC)**  
 Zhao, D., & Oh, J. (2020). Noticing Motion Patterns: Temporal CNN with a Novel Convolution Operator for Human Trajectory Prediction. IEEE Robotics and Automation Letters.  
 [link to paper](https://ieeexplore.ieee.org/abstract/document/9309403/?casa_token=pV4aFJU4-0UAAAAA:NRC5vkADgA7Jd4cmX9HcV4pXuqBxQxAx8-GugQIVSSiTqpOiehJZW1TYo4dBlLUDNWwxHDCCZg)
 
