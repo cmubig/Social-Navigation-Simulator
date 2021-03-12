@@ -38,6 +38,26 @@ sudo ./install.sh
 ```  
 ---
 
+### Library Requirement and Suggested Version
+The following libraries should already exist in the venv, when you run the install script.
+
+* tensorflow==1.15.2  
+* Pillow  
+* PyOpenGL   
+* pyyaml  
+* matplotlib>=3.0.0  
+* shapely  
+* pytz  
+* imageio==2.4.1  
+* gym  
+* moviepy  
+* pandas  
+* networkx  
+* torch===1.2.0  
+* attrdict  
+
+---
+
 ### Example Usage  
 ```
 cd experiments
