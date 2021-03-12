@@ -8,12 +8,12 @@ various settings and algorithms available to generate dense and rare crowd scena
 This version of simulator addtionally provides the following features, based on the original version of simulator:  
 
 - Addition of more social navigation policies
-- Agents can be easily configured to use different social navigation algorithms as their policies. (e.g. CADRL vs Socialforce )
 - Support different scene experiment setups to generate dense and rare crowd scenarios.
 - Dynamic number of agents in a scene (There can be a different number of agents during the same simulation)
 - Asynchronous entrance and exit of agents in a scene ( To simulate the dataset more accurately )
 - Collision timeout and resume ( Collided agents will halt their action for N seconds )
-
+- Agents can be easily configured to use different social navigation algorithms as their policies. 
+  (e.g. CADRL vs Socialforce )
 
 
 ---
