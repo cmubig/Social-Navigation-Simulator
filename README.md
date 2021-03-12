@@ -1,6 +1,7 @@
-# Social Navigation Simulator
 
 <img src="docs/_static/combo.gif" alt="Agents spelling ``CADRL''">
+
+# Social Navigation Simulator  
 
 **A social navigation simulator for simulating a more realistic pedestrian crowd, with
 various settings and algorithms available to generate dense and rare crowd scenarios.**
