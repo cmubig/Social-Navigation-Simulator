@@ -13,11 +13,11 @@ This version of simulator addtionally provides the following features, based on 
 - Dynamic number of agents in a scene (There can be a different number of agents during the same simulation)
 - Asynchronous entrance and exit of agents in a scene ( To simulate the dataset more accurately )
 - Collision timeout and resume ( Collided agents will halt their action for N seconds )
+- Output agents trajectories during simulation, in the format of datasets such as ETH,ZARA1,ZARA2.
 - Agents can be easily configured to use different social navigation algorithms as their policies. 
   (e.g. CADRL vs Socialforce )
-- Output agents trajectories during simulation, in the format of datasets such as ETH,ZARA1,ZARA2. 
 
-## Contributors  
+## Project Contributors  
 Sam Shum (cshum@andrew.cmu.edu), Advaith Sethuraman, Dapeng Zhao and Dr. Jean Oh 
 
 ---
