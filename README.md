@@ -18,8 +18,9 @@ This version of simulator addtionally provides the following features, based on 
 - Output agents trajectories during simulation, in the format of datasets such as ETH,ZARA1,ZARA2. 
 
 ## Contributors  
-Sam Shum (cshum@andrew.cmu.edu), Advaith Sethuraman, Dapeng Zhao and Jean Oh 
+Sam Shum (cshum@andrew.cmu.edu), Advaith Sethuraman, Dapeng Zhao and Dr. Jean Oh 
 
+---
 This simulator is developed based on the original work from [here](https://github.com/mit-acl/gym-collision-avoidance):  
 
 **Journal Version:** M. Everett, Y. Chen, and J. P. How, "Collision Avoidance in Pedestrian-Rich Environments with Deep Reinforcement Learning", in review, [Link to Paper](https://arxiv.org/abs/1910.11689)
@@ -29,14 +30,13 @@ This simulator is developed based on the original work from [here](https://githu
 This repo also contains the trained policy for the SA-CADRL paper (referred to as CADRL here) from the proceeding paper: Y. Chen, M. Everett, M. Liu, and J. P. How. “Socially Aware Motion Planning with Deep Reinforcement Learning.” IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS). Vancouver, BC, Canada, Sept. 2017. [Link to Paper](https://arxiv.org/abs/1703.08862)  
 
 
-
+---
 ## Download and install  
 ```
 git clone https://github.com/cmubig/Social-Navigation-Simulator.git --recurse-submodules
 cd Social-Navigation-Simulator
 sudo ./install.sh
 ```  
-
 ## Library Requirement and Suggested Version
 The following libraries should already exist in the venv, when you run the install script.
 
@@ -55,13 +55,13 @@ The following libraries should already exist in the venv, when you run the insta
 * torch===1.2.0  
 * attrdict  
 
-
+---
 ## Example Usage  
 ```
 cd experiments
 ./run_test_experiments
 ```
- 
+
 ## Different mode usage
 exp1 is for ( algorithm-generated dataset using settings from dataset (e.g. UNIV ) )  
 exp2 is for ( algorithm-generated dataset using population density from 0.1 to 1.0 )  
@@ -99,14 +99,13 @@ comment out the default simulation command inside run_test_experiment.sh,
 put your command in the end of run_test_experiment.sh
 
 
-
 ## Miscellaneous
 To change the __plot_while_simulation__ or __output_animation__ setting, change experiment/src/master_config_deploy.py
 ```python
 self.SHOW_EPISODE_PLOTS  = False    # plot and show while simulation? 
 self.SAVE_EPISODE_PLOTS  = self.ANIMATE_EPISODES = True  #save simulation result as animation as well?
 ```
-
+---
 
 ## References
 
@@ -152,13 +151,13 @@ CADRL Implementation from [here](https://github.com/mit-acl/gym-collision-avoida
 RVO2 Implementation from [here](https://github.com/mit-acl/gym-collision-avoidance), [here](https://github.com/mit-acl/Python-RVO2/tree/56b245132ea104ee8a621ddf65b8a3dd85028ed2)  
 
 
-
+---
 
 ## About the original simulator code
 
 Please see [the documentation](https://gym-collision-avoidance.readthedocs.io/en/latest/)!
 
-## Original code citation:
+## Code citation for the original simulator version:
 
 ```
 @inproceedings{Everett18_IROS,
@@ -173,4 +172,5 @@ Please see [the documentation](https://gym-collision-avoidance.readthedocs.io/en
   bdsk-url-1 = {https://arxiv.org/pdf/1805.01956.pdf}
 }
 ```
+
 
