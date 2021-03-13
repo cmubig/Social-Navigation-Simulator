@@ -17,6 +17,9 @@ This version of simulator addtionally provides the following features, based on 
   (e.g. CADRL vs Socialforce )
 - Output agents trajectories during simulation, in the format of datasets such as ETH,ZARA1,ZARA2. 
 
+---
+## Contributors  
+Sam Shum (cshum@andrew.cmu.edu), Advaith Sethuraman, Dapeng Zhao and Jean Oh 
 
 ---
 This simulator is developed based on the original work from [here](https://github.com/mit-acl/gym-collision-avoidance):  
@@ -30,7 +33,7 @@ This repo also contains the trained policy for the SA-CADRL paper (referred to a
 
 ---
 
-### Download and install  
+## Download and install  
 ```
 git clone https://github.com/cmubig/Social-Navigation-Simulator.git --recurse-submodules
 cd Social-Navigation-Simulator
@@ -38,7 +41,7 @@ sudo ./install.sh
 ```  
 ---
 
-### Library Requirement and Suggested Version
+## Library Requirement and Suggested Version
 The following libraries should already exist in the venv, when you run the install script.
 
 * tensorflow==1.15.2  
@@ -58,14 +61,14 @@ The following libraries should already exist in the venv, when you run the insta
 
 ---
 
-### Example Usage  
+## Example Usage  
 ```
 cd experiments
 ./run_test_experiments
 ```
 
 ---  
-### Different mode usage
+## Different mode usage
 exp1 is for ( algorithm-generated dataset using settings from dataset (e.g. UNIV ) )  
 exp2 is for ( algorithm-generated dataset using population density from 0.1 to 1.0 )  
 exp3 is for ( 1 vs n-1 ) mixed algorithms case, where 1 agents running algorithm A vs n-1 agents running algorithm B  
@@ -104,7 +107,7 @@ put your command in the end of run_test_experiment.sh
 
 ---
 
-### Miscellaneous
+## Miscellaneous
 To change the __plot_while_simulation__ or __output_animation__ setting, change experiment/src/master_config_deploy.py
 ```python
 self.SHOW_EPISODE_PLOTS  = False    # plot and show while simulation? 
@@ -112,7 +115,7 @@ self.SAVE_EPISODE_PLOTS  = self.ANIMATE_EPISODES = True  #save simulation result
 ```
 
 ---
-### References
+## References
 
 **Social LSTM**  
 Alahi, A., Goel, K., Ramanathan, V., Robicquet, A., Fei-Fei, L., & Savarese, S. (2016). Social lstm: Human trajectory prediction in crowded spaces. In Proceedings of the IEEE conference on computer vision and pattern recognition (pp. 961-971).  
@@ -145,7 +148,7 @@ Zhao, D., & Oh, J. (2020). Noticing Motion Patterns: Temporal CNN with a Novel C
 
 
 ---
-### Implementation References
+## Implementation References
 
 Social Force Implementation modified from [here](https://github.com/svenkreiss/socialforce)  
 Social LSTM Implementation modified from [here](https://github.com/quancore/social-lstm)  
@@ -158,11 +161,11 @@ RVO2 Implementation from [here](https://github.com/mit-acl/gym-collision-avoidan
 
 ---
 
-### About the original simulator code
+## About the original simulator code
 
 Please see [the documentation](https://gym-collision-avoidance.readthedocs.io/en/latest/)!
 
-### Original code citation:
+## Original code citation:
 
 ```
 @inproceedings{Everett18_IROS,
@@ -177,3 +180,4 @@ Please see [the documentation](https://gym-collision-avoidance.readthedocs.io/en
   bdsk-url-1 = {https://arxiv.org/pdf/1805.01956.pdf}
 }
 ```
+
