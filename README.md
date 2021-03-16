@@ -1,5 +1,5 @@
 
-<img src="docs/_static/combo.gif" alt="Agents spelling ``CADRL''">
+<img src="docs/_static/combo.gif" alt="Agents spelling ``CADRL''" width=400>
 
 # Social Navigation Simulator (SNS) 
 
