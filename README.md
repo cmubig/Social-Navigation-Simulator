@@ -29,6 +29,7 @@ Dapeng Zhao
 PI: [Jean Oh](http://www.cs.cmu.edu/~jeanoh/)
 
 ---
+<!--
 This simulator is developed based on the original work from [here](https://github.com/mit-acl/gym-collision-avoidance):  
 
 **Journal Version:** M. Everett, Y. Chen, and J. P. How, "Collision Avoidance in Pedestrian-Rich Environments with Deep Reinforcement Learning", in review, [Link to Paper](https://arxiv.org/abs/1910.11689)
@@ -36,7 +37,7 @@ This simulator is developed based on the original work from [here](https://githu
 **Conference Version:** M. Everett, Y. Chen, and J. P. How, "Motion Planning Among Dynamic, Decision-Making Agents with Deep Reinforcement Learning", IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), 2018. [Link to Paper](https://arxiv.org/abs/1805.01956), [Link to Video](https://www.youtube.com/watch?v=XHoXkWLhwYQ)
 
 This repo also contains the trained policy for the SA-CADRL paper (referred to as CADRL here) from the proceeding paper: Y. Chen, M. Everett, M. Liu, and J. P. How. “Socially Aware Motion Planning with Deep Reinforcement Learning.” IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS). Vancouver, BC, Canada, Sept. 2017. [Link to Paper](https://arxiv.org/abs/1703.08862)  
-
+-->
 
 ---
 ## Download and install  
