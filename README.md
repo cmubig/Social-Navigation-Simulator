@@ -46,6 +46,9 @@ cd Social-Navigation-Simulator
 sudo ./install.sh
 ```  
 ## Library Requirement and Suggested Version
+The following libraries will be automatically installed in the virtual environment(venv) created by the installation script.  
+Your original python workspace, library versions will not be affected.  
+
 The following libraries should already exist in the venv, when you run the install script.
 
 * tensorflow==1.15.2  
@@ -62,6 +65,23 @@ The following libraries should already exist in the venv, when you run the insta
 * networkx  
 * torch===1.2.0  
 * attrdict  
+
+## Hardware, Software System Requirements  
+These are the specifications of the hardware used during development.  
+Different combinations of hardware could work and will yield different speeds.  
+
+* Intel(R) Core(TM) i7-4720HQ CPU @ 2.60GHz
+* 8GB ram
+* GeForce GTX 960M (4GB)  
+
+These are the specifications of the software used during development.
+Different combinations of software might work.  
+
+* Ubuntu 18.04
+* CUDA 10.0  (CUDA Version 10.0.326 / Cuda compilation tools, release 10.0, V10.0.326)
+* cuDNN 7.6.5
+* Python 3.6.9
+
 
 ---
 ## Example Usage  
@@ -180,5 +200,6 @@ Please see [the documentation](https://gym-collision-avoidance.readthedocs.io/en
   bdsk-url-1 = {https://arxiv.org/pdf/1805.01956.pdf}
 }
 ```
+
 
 

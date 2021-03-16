@@ -1,4 +1,4 @@
-Currently only "RVO" "CADRL" is stable for ./run_test_experiment
+"Socialforce" "CADRL" for ./run_test_experiment
 
 
 ./run_test_experiment.sh
