@@ -39,7 +39,6 @@ This simulator is developed based on the original work from [here](https://githu
 This repo also contains the trained policy for the SA-CADRL paper (referred to as CADRL here) from the proceeding paper: Y. Chen, M. Everett, M. Liu, and J. P. How. “Socially Aware Motion Planning with Deep Reinforcement Learning.” IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS). Vancouver, BC, Canada, Sept. 2017. [Link to Paper](https://arxiv.org/abs/1703.08862)  
 -->
 
----
 ## Download and install  
 ```
 git clone https://github.com/cmubig/Social-Navigation-Simulator.git --recurse-submodules
