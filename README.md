@@ -1,14 +1,16 @@
 
 <img src="docs/_static/combo.gif" alt="Agents spelling ``CADRL''">
 
-# Social Navigation Simulator  
+# Social Navigation Simulator (SNS) 
 
-**A social navigation simulator for simulating a more realistic pedestrian crowd, with
+**Social Navigation Simulator (SNS) is developed based on [Gym-Collision-Avoidance (GCA)](https://github.com/mit-acl/gym-collision-avoidance) to simulate diverse types of realistic pedestrian crowds, with
 various settings and algorithms available to generate dense and rare crowd scenarios.**
 
-This version of simulator addtionally provides the following features, based on the original version of simulator:  
+The SNS simulator addtionally provides the following features, in addition to what is available in the GCA simulator:  
 
-- Addition of more social navigation policies
+(Need to elaborate and clearly describe each advantage)
+
+- Addition of more social navigation policies (list specific algorithms here)
 - Support different scene experiment setups to generate dense and rare crowd scenarios.
 - Dynamic number of agents in a scene (There can be a different number of agents during the same simulation)
 - Asynchronous entrance and exit of agents in a scene ( To simulate the dataset more accurately )
@@ -18,7 +20,10 @@ This version of simulator addtionally provides the following features, based on 
   (e.g. CADRL vs Socialforce )
 
 ## Project Contributors  
-Sam Shum (cshum@andrew.cmu.edu), Advaith Sethuraman, Dapeng Zhao and Dr. Jean Oh 
+Sam Shum (cshum@andrew.cmu.edu)
+Advaith Sethuraman
+Dapeng Zhao
+PI: [Jean Oh](http://www.cs.cmu.edu/~jeanoh/)
 
 ---
 This simulator is developed based on the original work from [here](https://github.com/mit-acl/gym-collision-avoidance):  
