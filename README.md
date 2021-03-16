@@ -21,8 +21,11 @@ The SNS simulator addtionally provides the following features, in addition to wh
 
 ## Project Contributors  
 Sam Shum (cshum@andrew.cmu.edu)
+
 Advaith Sethuraman
+
 Dapeng Zhao
+
 PI: [Jean Oh](http://www.cs.cmu.edu/~jeanoh/)
 
 ---
