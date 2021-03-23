@@ -519,7 +519,7 @@ class SLSTMPolicy(InternalPolicy):
         #print("PREDICTION")
         #print(ret_x_seq.data.cpu().numpy()[-12:][:,agent_index])
 
-        prediction_index = 4
+        prediction_index = 0
         self.next_waypoint = np.array( agents[agent_index].goal_global_frame ) + ret_x_seq.data.cpu().numpy()[-12:][:,agent_index][prediction_index]
         #print(next_waypoint)
 
@@ -533,12 +533,10 @@ class SLSTMPolicy(InternalPolicy):
 
         ref_prll_angle_global_frame = np.arctan2(ref_prll[1],
                                                  ref_prll[0])
-        heading_ego_frame = wrap( agents[agent_index].heading_global_frame -
-                                      ref_prll_angle_global_frame)
+        heading_ego_frame = wrap( agents[agent_index].heading_global_frame - ref_prll_angle_global_frame)
 
     
-
-        vel_global_frame = ((( self.next_waypoint - agents[agent_index].pos_global_frame)/(prediction_index+1))/4) / agents[agent_index].dt_nominal
+        vel_global_frame = (( goal_direction)/4) / agents[agent_index].dt_nominal
 
         speed_global_frame = np.linalg.norm(vel_global_frame) 
         print("calc speed")

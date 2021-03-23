@@ -438,7 +438,7 @@ class STGCNNPolicy(InternalPolicy):
 ##        print(V_pred_rel_to_abs.shape)
 ##        print(V_pred_rel_to_abs)
 
-        prediction_index = 2 #0
+        prediction_index = 0 #0
         self.next_waypoint =  V_pred_rel_to_abs[prediction_index][agent_index] #agents[agent_index].pos_global_frame +
         #print(next_waypoint)
 
@@ -458,7 +458,7 @@ class STGCNNPolicy(InternalPolicy):
 
     
 
-        vel_global_frame = ((( self.next_waypoint - agents[agent_index].pos_global_frame)/(prediction_index+1))/4) / agents[agent_index].dt_nominal
+        vel_global_frame = (( goal_direction)/4) / agents[agent_index].dt_nominal
 
         speed_global_frame = np.linalg.norm(vel_global_frame) 
         #if speed_global_frame > agents[agent_index].pref_speed: speed_global_frame = agents[agent_index].pref_speed

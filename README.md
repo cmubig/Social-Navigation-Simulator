@@ -185,6 +185,7 @@ RVO2 Implementation from [here](https://github.com/mit-acl/gym-collision-avoidan
 
 Please see [the documentation](https://gym-collision-avoidance.readthedocs.io/en/latest/)!
 
+
 ## Code citation for the original simulator version:
 
 ```

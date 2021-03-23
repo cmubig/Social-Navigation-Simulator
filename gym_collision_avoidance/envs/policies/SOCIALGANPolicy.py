@@ -34,11 +34,11 @@ class SOCIALGANPolicy(InternalPolicy):
         self.is_init = False
 
 
-        print("load 1")
+        #print("load 1")
         self.checkpoint = torch.load("../envs/policies/SOCIALGAN/models/sgan-models/univ_12_model.pt")
-        print("load 2")        
+        #print("load 2")        
         self.generator = self.get_generator(self.checkpoint)
-        print("load 3")
+        #print("load 3")
         self._args = AttrDict(self.checkpoint['args'])
 
     def init(self,agents):
@@ -419,18 +419,18 @@ class SOCIALGANPolicy(InternalPolicy):
         #print("load 4")
         prediction = self.evaluate(self._args, loader, self.generator)
 
-        prediction_index = 2 #0
+        prediction_index = 0 #0
         self.next_waypoint = prediction[prediction_index][agent_index]
-        print("Agent index")
-        print(agent_index)
-        print("position")
-        print(agents[agent_index].pos_global_frame)
-        print("observation_x_input")
-        print(observation_x_input[agent_index])
-        print("observation_y_input")
-        print(observation_y_input[agent_index])
-        print("prediction")
-        print(prediction)
+##        print("Agent index")
+##        print(agent_index)
+##        print("position")
+##        print(agents[agent_index].pos_global_frame)
+##        print("observation_x_input")
+##        print(observation_x_input[agent_index])
+##        print("observation_y_input")
+##        print(observation_y_input[agent_index])
+##        print("prediction")
+##        print(prediction)
 
         goal_direction = self.next_waypoint - agents[agent_index].pos_global_frame
         self.dist_to_goal = math.sqrt(goal_direction[0]**2 + goal_direction[1]**2)
@@ -447,7 +447,7 @@ class SOCIALGANPolicy(InternalPolicy):
 
     
 
-        vel_global_frame = ((( self.next_waypoint - agents[agent_index].pos_global_frame)/(prediction_index+1))/4) / agents[agent_index].dt_nominal
+        vel_global_frame = (( goal_direction)/4) / agents[agent_index].dt_nominal
 
         speed_global_frame = np.linalg.norm(vel_global_frame) 
         print("calc speed")
