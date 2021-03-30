@@ -8,8 +8,6 @@ various settings and algorithms available to generate dense and rare crowd scena
 
 The SNS simulator addtionally provides the following features, in addition to what is available in the GCA simulator:  
 
-(Need to elaborate and clearly describe each advantage)
-
 - Addition of more social navigation policies. On top of the CADRL, ORCA algorithms provided by the GCA simulator, we additionally implemented Social LSTM, Social GAN, Social force model, Social-STGCNN, Constant Velocity Model and Social-PEC. With the addition of the mentioned algorithms, it is able to simulate a diverse type of more realistic pedestrian crowds.  
 
 - Support different scene experiment setups to generate dense and rare crowd scenarios. Such that it is easier to collect crowded scenarios and rare agent collision scenarios, which can be difficult to collect in real life.
