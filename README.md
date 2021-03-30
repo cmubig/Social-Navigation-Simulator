@@ -63,7 +63,7 @@ The following libraries should already exist in the venv, when you run the insta
 * moviepy  
 * pandas  
 * networkx  
-* torch===1.2.0  
+* torch===1.3.1  
 * attrdict  
 
 ## Hardware, Software System Requirements  
