@@ -10,14 +10,18 @@ The SNS simulator addtionally provides the following features, in addition to wh
 
 (Need to elaborate and clearly describe each advantage)
 
-- Addition of more social navigation policies (list specific algorithms and citations here)
-- Support different scene experiment setups to generate dense and rare crowd scenarios.
-- Dynamic number of agents in a scene (There can be a different number of agents during the same simulation)
-- Asynchronous entrance and exit of agents in a scene ( To simulate the dataset more accurately )
-- Collision timeout and resume ( Collided agents will halt their action for N seconds )
-- Output agents trajectories during simulation, in the format of datasets such as ETH,ZARA1,ZARA2.
-- Agents can be easily configured to use different social navigation algorithms as their policies. 
-  (e.g. CADRL vs Socialforce )
+- Addition of more social navigation policies. On top of the CADRL, ORCA algorithms provided by the GCA simulator, we additionally implemented Social LSTM, Social GAN, Social force model, Social-STGCNN, Constant Velocity Model and Social-PEC. With the addition of the mentioned algorithms, it is able to simulate a diverse type of more realistic pedestrian crowds.  
+
+- Support different scene experiment setups to generate dense and rare crowd scenarios. Such that it is easier to collect crowded scenarios and rare agent collision scenarios, which can be difficult to collect in real life.
+
+- Supports a variable number of agents present in the scene during simulation, allowing asynchronous entrance and exit of agents. Agents can exit the scene while new agents enter the scene simultaneously, which can help simulate the pedestrian's social navigation behavior more accurately.  
+
+- Support agents' temporary collision freeze and action resume timeout, such that collided agents will halt their action temporarily, similar to pedestrian behavior when they accidentally run into each other.  
+
+- Output agents trajectories during simulation, export the simulation results in the format of datasets such as ETH,ZARA1,ZARA2. Allowing users to directly use the simulated trajectories as a new extra dataset for further training.  
+
+- Agents can be easily configured to use different combinations of social navigation algorithms as their policies. (e.g. CADRL vs Socialforce )  
+
 
 ## Project Contributors  
 Sam Shum (cshum@andrew.cmu.edu)
