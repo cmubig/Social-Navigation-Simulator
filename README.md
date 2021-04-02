@@ -6,7 +6,7 @@
 **Social Navigation Simulator (SNS) is developed based on [Gym-Collision-Avoidance (GCA)](https://github.com/mit-acl/gym-collision-avoidance) to simulate diverse types of realistic pedestrian crowds, with
 various settings and algorithms available to generate dense and rare crowd scenarios.**
 
-The SNS simulator addtionally provides the following features, in addition to what is available in the GCA simulator:  
+The SNS simulator provides the following new features, in addition to what is available in the GCA simulator:  
 
 - Addition of more social navigation policies. On top of the CADRL, ORCA algorithms provided by the GCA simulator, we additionally implemented Social LSTM, Social GAN, Social force model, Social-STGCNN, Constant Velocity Model and Social-PEC. With the addition of the mentioned algorithms, it is able to simulate a diverse type of more realistic pedestrian crowds.  
 
@@ -183,6 +183,7 @@ RVO2 Implementation from [here](https://github.com/mit-acl/gym-collision-avoidan
 
 ---
 
+<!--
 ## About the original simulator code
 
 Please see [the documentation](https://gym-collision-avoidance.readthedocs.io/en/latest/)!
@@ -203,6 +204,6 @@ Please see [the documentation](https://gym-collision-avoidance.readthedocs.io/en
   bdsk-url-1 = {https://arxiv.org/pdf/1805.01956.pdf}
 }
 ```
-
+-->
 
 
