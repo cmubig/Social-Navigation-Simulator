@@ -350,8 +350,8 @@ class CollisionAvoidanceEnv(gym.Env):
 
 
 
-                    print("RESPAWN"*15)
-                    print(respawn_scenario)
+                    #print("RESPAWN"*15)
+                    #print(respawn_scenario)
                     agent_policy     = "LINEAR" if agent.policy.str == "NonCooperativePolicy" else agent.policy.str
 
                     _,_, start_x, start_y, goal_x, goal_y, past_traj,_,_ = respawn_scenario
