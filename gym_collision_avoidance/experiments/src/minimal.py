@@ -62,7 +62,7 @@ def main():
     policies=['GA3C_CADRL', 'SimpleMap']
     sensors = ['other_agents_states', 'static_map']
     policy_classes = [tc.policy_dict[policy] for policy in policies]
-    agents = tc.get_testcase_two_agents(policies, sensors=sensors)
+    agents = tc.get_testcase_two_agents_maps(policies, sensors=sensors)
     [agent.policy.initialize_network() for agent in agents if hasattr(agent.policy, 'initialize_network')]
     env.set_agents(agents)
 
