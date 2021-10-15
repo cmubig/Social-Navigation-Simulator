@@ -21,6 +21,7 @@ gym_collision_avoidance/envs/policies/Python-RVO2/dist
 
 docs/_build
 gym_collision_avoidance/experiments/src/test_bar.py
+trajair/
 gym_collision_avoidance/navigan/CMakeLists.txt
 gym_collision_avoidance/navigan/datasets/eth/test/biwi_eth.txt
 gym_collision_avoidance/navigan/datasets/eth/train/biwi_hotel_train.txt
