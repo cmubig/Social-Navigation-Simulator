@@ -1,15 +1,17 @@
 import numpy as np
 from gym_collision_avoidance.envs.util import find_nearest, rgba2rgb
 from sys import platform
+import os
+
+backend = os.getenv('MPLBACKEND', 'TkAgg')
 if platform == "darwin":
     import matplotlib as mpl
-    mpl.use('TkAgg')
+    mpl.use(backend)
 import matplotlib.pyplot as plt
 import matplotlib
 
-matplotlib.use('TkAgg')
+matplotlib.use(backend)
 
-import os
 import matplotlib.patches as ptch
 from matplotlib.collections import LineCollection
 import glob
