@@ -23,6 +23,7 @@ master_config   = Master_Config()
 # Policies
 from gym_collision_avoidance.envs.policies.StaticPolicy import StaticPolicy
 from gym_collision_avoidance.envs.policies.NonCooperativePolicy import NonCooperativePolicy
+from gym_collision_avoidance.envs.policies.SimpleStaticMapPolicy import SimpleStaticMapPolicy
 # from gym_collision_avoidance.envs.policies.DRLLongPolicy import DRLLongPolicy
 from gym_collision_avoidance.envs.policies.RVOPolicy import RVOPolicy
 from gym_collision_avoidance.envs.policies.CADRLPolicy import CADRLPolicy
@@ -64,6 +65,7 @@ test_case_filename = "{dir}/test_cases/{pref_speed_string}{num_agents}_agents_{n
 policy_dict = {
     'RVO': RVOPolicy,
     'LINEAR': NonCooperativePolicy,
+    'SimpleMap': SimpleStaticMapPolicy,
     'carrl': CARRLPolicy,
     'external': ExternalPolicy,
     'GA3C_CADRL': GA3CCADRLPolicy,
@@ -84,6 +86,7 @@ policy_dict = {
 sensor_dict = {
     'other_agents_states': OtherAgentsStatesSensor,
     'laserscan': LaserScanSensor,
+    'occupancy_grid': OccupancyGridSensor
     # 'other_agents_states_encoded': OtherAgentsStatesSensorEncode,
 }
 
@@ -100,12 +103,13 @@ def get_testcase_crazy(policy="GA3C_CADRL"):
     ] 
     return agents
 
-def get_testcase_two_agents(policies=['learning', 'GA3C_CADRL']):
+def get_testcase_two_agents(policies=['learning', 'GA3C_CADRL'], sensors=['other_agents_states']):
     goal_x = 3
     goal_y = 3
+    sensor_classes = [sensor_dict[sensor] for sensor in sensors]
     agents = [
-        Agent(-goal_x, -goal_y, goal_x, goal_y, 0.5, 1.0, 0.0, policy_dict[policies[0]], UnicycleDynamics, [OtherAgentsStatesSensor], 0),
-        Agent(goal_x, goal_y, -goal_x, -goal_y, 0.5, 1.0, np.pi, policy_dict[policies[1]], UnicycleDynamics, [OtherAgentsStatesSensor], 1)
+        Agent(-goal_x, -goal_y, goal_x, goal_y, 0.5, 1.0, 0.0, policy_dict[policies[0]], UnicycleDynamics, sensor_classes, 0),
+        Agent(goal_x, goal_y, -goal_x, -goal_y, 0.5, 1.0, np.pi, policy_dict[policies[1]], UnicycleDynamics, sensor_classes, 1)
         ]
     return agents
 

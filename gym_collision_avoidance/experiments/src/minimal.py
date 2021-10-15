@@ -59,9 +59,10 @@ def main():
         os.path.dirname(os.path.realpath(__file__)) + f'/../../experiments/results/minimal/{map_name}/')
 
     # Set agent configuration (start/goal pos, radius, size, policy)
-    policies=['GA3C_CADRL', 'GA3C_CADRL']
+    policies=['GA3C_CADRL', 'SimpleMap']
+    sensors = ['other_agents_states', 'occupancy_grid']
     policy_classes = [tc.policy_dict[policy] for policy in policies]
-    agents = tc.get_testcase_two_agents(policies)
+    agents = tc.get_testcase_two_agents(policies, sensors=sensors)
     [agent.policy.initialize_network() for agent in agents if hasattr(agent.policy, 'initialize_network')]
     env.set_agents(agents)
 
@@ -76,6 +77,9 @@ def main():
         # Run a simulation step (check for collisions, move sim agents)
         obs, rewards, game_over, which_agents_done = env.step(actions)
         agents = env.agents
+        for i, agent in enumerate(agents):
+            if not agent.is_done and agent.in_collision:
+                print(f'\tAgent {i} in collision')
 
         if game_over:
             print("All agents finished!")

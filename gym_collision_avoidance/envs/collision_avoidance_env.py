@@ -27,6 +27,7 @@ from itertools import compress
 # Policies
 from gym_collision_avoidance.envs.policies.StaticPolicy import StaticPolicy
 from gym_collision_avoidance.envs.policies.NonCooperativePolicy import NonCooperativePolicy
+from gym_collision_avoidance.envs.policies.SimpleStaticMapPolicy import SimpleStaticMapPolicy
 # from gym_collision_avoidance.envs.policies.DRLLongPolicy import DRLLongPolicy
 from gym_collision_avoidance.envs.policies.RVOPolicy import RVOPolicy
 from gym_collision_avoidance.envs.policies.CADRLPolicy import CADRLPolicy
@@ -55,6 +56,8 @@ from gym_collision_avoidance.envs.sensors.OccupancyGridSensor import OccupancyGr
 from gym_collision_avoidance.envs.sensors.LaserScanSensor import LaserScanSensor
 from gym_collision_avoidance.envs.sensors.OtherAgentsStatesSensor import OtherAgentsStatesSensor
 
+from gym_collision_avoidance.envs.test_cases import sensor_dict
+from gym_collision_avoidance.experiments.src.env_utils import policies as env_policies
 
 #for generate new agents to replace old agents (dynamic number of agents)
 from gym_collision_avoidance.experiments.src.master_scenario_generator import Scenario_Generator, Seeded_Scenario_Generator, Seeded_Population_Scenario_Generator, Single_Seeded_Population_Scenario_Generator, real_dataset_traj
@@ -74,6 +77,7 @@ policy_dict = {
     'SOCIALFORCE' : SOCIALFORCEPolicy,
     'SLSTM' : SLSTMPolicy,
     'SOCIALGAN' : SOCIALGANPolicy,
+    'SimpleMap': SimpleStaticMapPolicy,
     # 'GROUPNAVIGAN' : GROUPNAVIGANPolicy,
     'CVM' : CVMPolicy,
 }
@@ -389,7 +393,9 @@ class CollisionAvoidanceEnv(gym.Env):
 ##                            self.scenario.append( Seeded_Population_Scenario_Generator( global_population_density, algorithm_name, self.exp_setting[4],self.exp_setting[5], self.exp_setting[6], self.exp_setting[7], self.exp_setting[2],
 ##                                                                                        0.2, 0, random_seed=i , num_agents_override=number_of_agents ).population_random_square_edge() )
 
-                    new_agent = Agent( agent_px, agent_py, agent_gx, agent_gy, agent_radius, agent_pref_speed, agent_heading, policy_dict[agent_policy], UnicycleDynamics, [OtherAgentsStatesSensor], (number_of_agents-1) )
+                    #TODO: Init with the other agent's Dynamics
+                    new_sensors = [type(sensor) for sensor in agent_sensors]
+                    new_agent = Agent( agent_px, agent_py, agent_gx, agent_gy, agent_radius, agent_pref_speed, agent_heading, policy_dict[agent_policy], UnicycleDynamics, new_sensors, (number_of_agents-1) )
                     if hasattr(new_agent.policy, 'initialize_network'):
                         new_agent.policy.initialize_network()
                     if not hasattr(new_agent, 'max_heading_change'):
@@ -655,9 +661,9 @@ class CollisionAvoidanceEnv(gym.Env):
         else:
             static_map_filename = self.static_map_filename
 
-        x_width = 16 # meters
-        y_width = 16 # meters
-        grid_cell_size = 0.1 # meters/grid cell
+        x_width = Config.STATIC_MAP_SIZE # meters
+        y_width = Config.STATIC_MAP_SIZE # meters
+        grid_cell_size = Config.STATIC_MAP_GRID_CELL_SIZE # meters/grid cell
         self.map = Map(x_width, y_width, grid_cell_size, static_map_filename)
 
     def _compute_rewards(self):

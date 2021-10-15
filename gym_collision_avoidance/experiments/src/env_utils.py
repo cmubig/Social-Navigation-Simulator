@@ -540,7 +540,10 @@ policies = {
     'policy': 'LINEAR',
     'sensors': ['other_agents_states']
         },
-
+    'SimpleMap': {
+    'policy': 'SimpleMap',
+    'sensors': ['other_agents_states', 'occupancy_grid']
+    },
     'CVM': {
     'policy': 'CVM',
     'sensors': ['other_agents_states']

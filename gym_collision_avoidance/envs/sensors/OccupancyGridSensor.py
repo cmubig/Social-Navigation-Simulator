@@ -3,6 +3,8 @@ from gym_collision_avoidance.envs.sensors.Sensor import Sensor
 
 import matplotlib.pyplot as plt
 
+from gym_collision_avoidance.envs import Config
+
 class OccupancyGridSensor(Sensor):
     """ OccupancyGrid based on map of the environment (containing static objects and other agents)
 
@@ -17,9 +19,10 @@ class OccupancyGridSensor(Sensor):
             print("OccupancyGridSensor won't work without static map enabled (Config.USE_STATIC_MAP)")
             assert(0)
         Sensor.__init__(self)
-        self.x_width = 5
-        self.y_width = 5
-        self.grid_cell_size = 0.01 # currently ignored
+        self.name = 'occupancy_grid'
+        # TODO: get from Config
+        self.x_width = 5#2*Config.STATIC_MAP_SIZE
+        self.y_width = 5#2*Config.STATIC_MAP_SIZE
 
     def sense(self, agents, agent_index, top_down_map):
         """ Use the full top_down_map to compute a smaller occupancy grid centered around agents[agent_index]'s center.
