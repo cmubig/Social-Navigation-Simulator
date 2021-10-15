@@ -15,6 +15,7 @@ venv
 log
 
 gym_collision_avoidance/envs/policies/CADRL/pickle_files/multi/nn_training_param.p
+gym_collision_avoidance/envs/policies/Python-RVO2/dist
 
 # gym_collision_avoidance/envs/test_cases/2_agents_500_cases_carrl_seed*.p
 
