@@ -1,6 +1,6 @@
 number_of_agent = 60
 
-from master_scenario_generator import Scenario_Generator, Seeded_Scenario_Generator, Seeded_Population_Scenario_Generator
+from .master_scenario_generator import Scenario_Generator, Seeded_Scenario_Generator, Seeded_Population_Scenario_Generator
 
 class Master_Config(object):
     def __init__(self):

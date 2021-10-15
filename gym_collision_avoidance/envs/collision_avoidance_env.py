@@ -57,7 +57,7 @@ from gym_collision_avoidance.envs.sensors.OtherAgentsStatesSensor import OtherAg
 
 
 #for generate new agents to replace old agents (dynamic number of agents)
-from master_scenario_generator import Scenario_Generator, Seeded_Scenario_Generator, Seeded_Population_Scenario_Generator, Single_Seeded_Population_Scenario_Generator, real_dataset_traj
+from gym_collision_avoidance.experiments.src.master_scenario_generator import Scenario_Generator, Seeded_Scenario_Generator, Seeded_Population_Scenario_Generator, Single_Seeded_Population_Scenario_Generator, real_dataset_traj
 policy_dict = {
     'RVO': RVOPolicy,
     'LINEAR': NonCooperativePolicy,
@@ -389,6 +389,8 @@ class CollisionAvoidanceEnv(gym.Env):
 ##                                                                                        0.2, 0, random_seed=i , num_agents_override=number_of_agents ).population_random_square_edge() )
 
                     new_agent = Agent( agent_px, agent_py, agent_gx, agent_gy, agent_radius, agent_pref_speed, agent_heading, policy_dict[agent_policy], UnicycleDynamics, [OtherAgentsStatesSensor], (number_of_agents-1) )
+                    if hasattr(new_agent.policy, 'initialize_network'):
+                        new_agent.policy.initialize_network()
                     new_agent.reset( px=agent_px, py=agent_py, gx=agent_gx, gy=agent_gy, pref_speed=agent_pref_speed, radius=agent_radius, heading=agent_heading,
                                      start_step_num= self.episode_step_number ,start_t= self.episode_step_number*self.dt_nominal)
 
@@ -535,7 +537,7 @@ class CollisionAvoidanceEnv(gym.Env):
             elif agent.policy.is_external:
                 all_actions[agent_index, :] = agent.policy.external_action_to_action(agent, actions[agent_index])
             else:
-                dict_obs = None #self.observation[agent_index]
+                dict_obs = self.observation[agent_index]
                 action_args = inspect.getfullargspec(agent.policy.find_next_action)[0]
                 if 'full_agent_list' in action_args and 'active_agent_mask' in action_args:
                     all_actions[agent_index, :] = agent.policy.find_next_action(dict_obs, self.agents, agent_index,  full_agent_list = self.agents, active_agent_mask = self.active_agent_mask)

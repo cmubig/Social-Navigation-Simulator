@@ -1,15 +1,15 @@
 number_of_agent = 100
 import os
 
-from master_scenario_generator import Scenario_Generator, Seeded_Scenario_Generator, Seeded_Population_Scenario_Generator, real_dataset_traj
+from .master_scenario_generator import Scenario_Generator, Seeded_Scenario_Generator, Seeded_Population_Scenario_Generator, real_dataset_traj
 
 class Master_Config(object):
     def __init__(self):
 
-        global_timeout            = int(os.environ["global_timeout"])
-        global_experiment_number  = int(os.environ["global_experiment_number"])
-        global_dataset_name       = os.environ["global_dataset_name"]
-        global_population_density = float(os.environ["global_population_density"])
+        global_timeout            = int(os.getenv("global_timeout", 60))
+        global_experiment_number  = int(os.getenv("global_experiment_number", 1))
+        global_dataset_name       = os.getenv("global_dataset_name", "ETH")
+        global_population_density = float(os.getenv("global_population_density", 0.3))
 
 ##        print("FROM MASTER")
 ##        print(os.environ["global_timeout"] )

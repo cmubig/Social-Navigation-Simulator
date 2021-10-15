@@ -8,11 +8,11 @@ SOURCE_VENV=${2:-true}
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 if $MAKE_VENV; then
-    # Virtualenv w/ python3
-    export PYTHONPATH=/usr/bin/python3 # point to your python3
-    python3 -m pip install virtualenv
+    # Virtualenv w/ python3.7
+    export PYTHONPATH=/usr/bin/python3.7 # point to your python3.7
+    python3.7 -m pip install virtualenv
     cd $DIR
-    python3 -m virtualenv venv
+    python3.7 -m virtualenv venv
 fi
 
 if $SOURCE_VENV; then
@@ -20,6 +20,7 @@ if $SOURCE_VENV; then
     source venv/bin/activate
     export PYTHONPATH=${DIR}/venv/bin/python/dist-packages
 fi
+echo "Python at: "$(which python)
 
 # Install this pkg and its requirements
 python -m pip install -e $DIR
