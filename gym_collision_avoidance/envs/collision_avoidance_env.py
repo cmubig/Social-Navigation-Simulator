@@ -352,6 +352,7 @@ class CollisionAvoidanceEnv(gym.Env):
 
                     #print("RESPAWN"*15)
                     #print(respawn_scenario)
+                    print(f'RESPAWNING: {i} -> {len(self.agents)}')
                     agent_policy     = "LINEAR" if agent.policy.str == "NonCooperativePolicy" else agent.policy.str
 
                     _,_, start_x, start_y, goal_x, goal_y, past_traj,_,_ = respawn_scenario
@@ -391,6 +392,10 @@ class CollisionAvoidanceEnv(gym.Env):
                     new_agent = Agent( agent_px, agent_py, agent_gx, agent_gy, agent_radius, agent_pref_speed, agent_heading, policy_dict[agent_policy], UnicycleDynamics, [OtherAgentsStatesSensor], (number_of_agents-1) )
                     if hasattr(new_agent.policy, 'initialize_network'):
                         new_agent.policy.initialize_network()
+                    if not hasattr(new_agent, 'max_heading_change'):
+                        new_agent.max_heading_change = self.max_heading_change
+                    if not hasattr(new_agent, 'max_speed'):
+                        new_agent.max_speed = self.max_speed
                     new_agent.reset( px=agent_px, py=agent_py, gx=agent_gx, gy=agent_gy, pref_speed=agent_pref_speed, radius=agent_radius, heading=agent_heading,
                                      start_step_num= self.episode_step_number ,start_t= self.episode_step_number*self.dt_nominal)
 
@@ -531,11 +536,14 @@ class CollisionAvoidanceEnv(gym.Env):
         # Agents set their action (either from external or w/ find_next_action)
         #print("self.active_agents[0].heading_ego_frame")
         #print(self.active_agents[0].heading_ego_frame)
+        #print(f'Num agents: {len(self.agents)}, Num alive agents: {len([agent for agent in self.agents if not agent.is_done])}')
         for agent_index, agent in enumerate(self.agents):
             if agent.is_done:
                 continue
             elif agent.policy.is_external:
-                all_actions[agent_index, :] = agent.policy.external_action_to_action(agent, actions[agent_index])
+                agent_action = actions[agent_index]
+                ext_actions = agent.policy.external_action_to_action(agent, agent_action)
+                all_actions[agent_index, :] = ext_actions
             else:
                 dict_obs = self.observation[agent_index]
                 action_args = inspect.getfullargspec(agent.policy.find_next_action)[0]

@@ -55,18 +55,21 @@ def main():
         os.path.dirname(os.path.realpath(__file__)) + '/../../experiments/results/example/')
 
     # Set agent configuration (start/goal pos, radius, size, policy)
-    agents = tc.get_testcase_two_agents()
+    policies=['learning', 'GA3C_CADRL']
+    policy_classes = [tc.policy_dict[policy] for policy in policies]
+    agents = tc.get_testcase_two_agents(policies)
     [agent.policy.initialize_network() for agent in agents if hasattr(agent.policy, 'initialize_network')]
     env.set_agents(agents)
 
     obs = env.reset() # Get agents' initial observations
 
     # Repeatedly send actions to the environment based on agents' observations
-    num_steps = 100
+    num_steps = 500
     set_point = np.pi/6.0
     P = 1.0
     int_err = 0.0
     err = 0.0
+    learning_idx = 0
     for i in range(num_steps):
 
         # Query the external agents' policies
@@ -74,11 +77,21 @@ def main():
         actions = {}
 
         # basic test, have 1st agent go on set heading
-        p_err = err
-        curr = agents[0].heading_global_frame
-        err = set_point - agents[0].heading_global_frame
-        control = np.clip(P*err, -1, 1)/2.0 + 0.5
-        actions[0] = np.array([1.0, control])
+        alive_agents = [agent for agent in agents if not agent.is_done]
+        learning_agents = [agent for agent in alive_agents if type(agent.policy) == policy_classes[0]]
+        # Upate the Learning Agent if it is still alive
+        if len(learning_agents):
+            learning_agent = learning_agents[0]
+            new_learning_idx = agents.index(learning_agent)
+            if new_learning_idx != learning_idx:
+                learning_idx = new_learning_idx
+                P, int_err, err = 1.0, 0.0, 0.0
+
+            p_err = err
+            curr = agents[learning_idx].heading_global_frame
+            err = set_point - agents[learning_idx].heading_global_frame
+            control = np.clip(P*err, -1, 1)/2.0 + 0.5
+            actions[learning_idx] = np.array([1.0, control])
 
         # Internal agents (running a pre-learned policy defined in envs/policies)
         # will automatically query their policy during env.step
@@ -86,6 +99,7 @@ def main():
 
         # Run a simulation step (check for collisions, move sim agents)
         obs, rewards, game_over, which_agents_done = env.step(actions)
+        agents = env.agents
 
         if game_over:
             print("All agents finished!")

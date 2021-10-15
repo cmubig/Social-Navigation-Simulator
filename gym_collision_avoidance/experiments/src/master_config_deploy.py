@@ -73,7 +73,7 @@ class Master_Config(object):
         #Formations config Level
 
         self.SHOW_EPISODE_PLOTS = False #plot while sim
-        self.SAVE_EPISODE_PLOTS  = self.ANIMATE_EPISODES = False  #output gif + mp4
+        self.SAVE_EPISODE_PLOTS  = self.ANIMATE_EPISODES = True  #output gif + mp4
         self.NEAR_GOAL_THRESHOLD = 0.2
         #ETH   [[-10, 17], [-6, 16]]
         #HOTEL [[-7,7],[-13,7]]
