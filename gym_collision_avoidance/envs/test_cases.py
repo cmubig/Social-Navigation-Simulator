@@ -51,6 +51,7 @@ from gym_collision_avoidance.envs.dynamics.ExternalDynamics import ExternalDynam
 from gym_collision_avoidance.envs.sensors.OccupancyGridSensor import OccupancyGridSensor
 from gym_collision_avoidance.envs.sensors.LaserScanSensor import LaserScanSensor
 from gym_collision_avoidance.envs.sensors.OtherAgentsStatesSensor import OtherAgentsStatesSensor
+from gym_collision_avoidance.envs.sensors.StaticMapSensor import StaticMapSensor
 from gym_collision_avoidance.envs import Config
 
 
@@ -86,7 +87,8 @@ policy_dict = {
 sensor_dict = {
     'other_agents_states': OtherAgentsStatesSensor,
     'laserscan': LaserScanSensor,
-    'occupancy_grid': OccupancyGridSensor
+    'occupancy_grid': OccupancyGridSensor,
+    'static_map': StaticMapSensor
     # 'other_agents_states_encoded': OtherAgentsStatesSensorEncode,
 }
 

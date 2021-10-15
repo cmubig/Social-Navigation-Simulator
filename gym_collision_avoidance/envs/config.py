@@ -83,6 +83,7 @@ class Config(object):
         self.STATIC_MAP_SIZE = 16
         self.STATIC_MAP_GRID_CELL_SIZE = 0.1
         #occupancy_grid_sz = 2*(int(self.STATIC_MAP_SIZE/self.STATIC_MAP_GRID_CELL_SIZE))
+        static_map_sz = int(self.STATIC_MAP_SIZE/self.STATIC_MAP_GRID_CELL_SIZE)
         occupancy_grid_sz = int(5/self.STATIC_MAP_GRID_CELL_SIZE)
         self.NUM_STEPS_IN_OBS_HISTORY = 1 # number of time steps to store in observation vector
         self.NUM_PAST_ACTIONS_IN_STATE = 0
@@ -161,12 +162,19 @@ class Config(object):
                 },
             'occupancy_grid': {
                 'dtype': bool,
-                # TODO: don't just hardcode
                 'size': (occupancy_grid_sz, occupancy_grid_sz),
                 'bounds': [0., 1.],
                 'attr': 'get_sensor_data("occupancy_grid")',
                 'std': 0.5*np.ones((occupancy_grid_sz, occupancy_grid_sz), dtype=bool),
                 'mean': 0.5*np.ones((occupancy_grid_sz, occupancy_grid_sz), dtype=bool)
+                },
+            'static_map': {
+                'dtype': bool,
+                'size': (static_map_sz, static_map_sz),
+                'bounds': [0., 1.],
+                'attr': 'get_sensor_data("static_map")',
+                'std': 0.5*np.ones((static_map_sz, static_map_sz), dtype=bool),
+                'mean': 0.5*np.ones((static_map_sz, static_map_sz), dtype=bool)
                 },
             'is_learning': {
                 'dtype': np.float32,
@@ -189,7 +197,7 @@ class Config(object):
 
     def setup_obs(self):
         if not hasattr(self, "STATES_IN_OBS"):
-            self.STATES_IN_OBS = ['is_learning', 'num_other_agents', 'dist_to_goal', 'heading_ego_frame', 'pref_speed', 'radius', 'other_agents_states', 'occupancy_grid']
+            self.STATES_IN_OBS = ['is_learning', 'num_other_agents', 'dist_to_goal', 'heading_ego_frame', 'pref_speed', 'radius', 'other_agents_states', 'occupancy_grid', 'static_map']
             # STATES_IN_OBS = ['dist_to_goal', 'radius', 'heading_ego_frame', 'pref_speed', 'other_agent_states', 'use_ppo', 'laserscan']
             # STATES_IN_OBS = ['dist_to_goal', 'radius', 'heading_ego_frame', 'pref_speed', 'other_agent_states', 'use_ppo'] # 2-agent net
             # STATES_IN_OBS = ['dist_to_goal', 'radius', 'heading_ego_frame', 'pref_speed', 'other_agents_states', 'use_ppo', 'num_other_agents', 'laserscan'] # LSTM

@@ -60,7 +60,7 @@ def main():
 
     # Set agent configuration (start/goal pos, radius, size, policy)
     policies=['GA3C_CADRL', 'SimpleMap']
-    sensors = ['other_agents_states', 'occupancy_grid']
+    sensors = ['other_agents_states', 'static_map']
     policy_classes = [tc.policy_dict[policy] for policy in policies]
     agents = tc.get_testcase_two_agents(policies, sensors=sensors)
     [agent.policy.initialize_network() for agent in agents if hasattr(agent.policy, 'initialize_network')]
