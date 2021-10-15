@@ -112,8 +112,8 @@ def plot_episode(agents, in_evaluate_mode,
 
     ax = fig.add_subplot(1, 1, 1)
 
-    # if env_map is not None:
-    #     ax.imshow(env_map.static_map, extent=[-env_map.x_width/2., env_map.x_width/2., -env_map.y_width/2., env_map.y_width/2.], cmap=plt.cm.binary)
+    if env_map is not None:
+        ax.imshow(env_map.static_map, extent=[-env_map.x_width/2., env_map.x_width/2., -env_map.y_width/2., env_map.y_width/2.], cmap=plt.cm.binary)
 
     if perturbed_obs is None:
         # Normal case of plotting
