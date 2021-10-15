@@ -11,4 +11,4 @@ print_header "Running example python script"
 
 # Experiment
 cd $DIR
-python src/example.py --experiment_num 1 --dataset_name ETH --timeout 30
+python src/example.py --experiment_num 1 --dataset_name ETH --timeout 60

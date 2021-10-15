@@ -314,3 +314,9 @@ class CollectRegressionDataset(EvaluateConfig):
 
         # # Laserscan mode
         # self.TEST_CASE_ARGS['agents_sensors'] = ['laserscan', 'other_agents_states']
+
+
+class MinimalMap(Example):
+    def __init__(self):
+        Example.__init__(self)
+        self.USE_STATIC_MAP = True

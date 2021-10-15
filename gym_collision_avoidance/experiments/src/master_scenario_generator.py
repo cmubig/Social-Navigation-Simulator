@@ -738,9 +738,10 @@ class real_dataset_traj(object):
 
             own_goal_points            = np.array( [[ goal_x, goal_y  ]]).astype(np.float)
 
-            past_start_points = np.concatenate((past_start_points,past_goal_points,past_current_points,own_goal_points))
 
             if len(past_goal_points)==0: break
+            #import pdb; pdb.set_trace()
+            past_start_points = np.concatenate((past_start_points,past_goal_points,past_current_points,own_goal_points))
 
             closet_distance_to_other_start_point = 999
             for past_start_point in past_start_points:

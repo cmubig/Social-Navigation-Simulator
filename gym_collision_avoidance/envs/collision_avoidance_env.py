@@ -340,6 +340,7 @@ class CollisionAvoidanceEnv(gym.Env):
                     global_population_density = float(os.environ["global_population_density"])
 
                     respawn_scenario = None
+                    print(f'RESPAWNING: {i} -> {len(self.agents)}')
                     #if is experiment 1, then respawn with real start&goal from dataset, will also override
                     if global_experiment_number ==1:
                         respawn_scenario = real_dataset_traj( dataset_name=global_dataset_name ).pick_one( list(compress(self.agents, temp_active_agent_mask)) ,random_seed=self.episode_step_number+i*500)
@@ -352,7 +353,6 @@ class CollisionAvoidanceEnv(gym.Env):
 
                     #print("RESPAWN"*15)
                     #print(respawn_scenario)
-                    print(f'RESPAWNING: {i} -> {len(self.agents)}')
                     agent_policy     = "LINEAR" if agent.policy.str == "NonCooperativePolicy" else agent.policy.str
 
                     _,_, start_x, start_y, goal_x, goal_y, past_traj,_,_ = respawn_scenario
