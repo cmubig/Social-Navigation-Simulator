@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from gym_collision_avoidance.envs import Config
 
 class StaticMapSensor(Sensor):
-    """ StaticMap is analogous to OccupancyGridSensor but without being ego-centric
+    """ StaticMap is analogous to OccupancyGridSensor but without being ego-centric; returns global static map
 
     Currently the grid parameters are mostly hard-coded...
 
@@ -19,7 +19,7 @@ class StaticMapSensor(Sensor):
             print("StaticMapSensor won't work without static map enabled (Config.USE_STATIC_MAP)")
             assert(0)
         Sensor.__init__(self)
-        self.name = 'occupancy_grid'
+        self.name = 'static_map'
         # TODO: get from Config
         self.x_width = Config.STATIC_MAP_SIZE
         self.y_width = Config.STATIC_MAP_SIZE
