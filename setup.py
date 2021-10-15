@@ -10,6 +10,8 @@ setup(
     python_requires='>=3.0, <4',
     install_requires=[
         'tensorflow==1.15.2',
+        'scipy==1.2.2',
+        'requests',
         'Pillow',
         'PyOpenGL',
         'pyyaml',
