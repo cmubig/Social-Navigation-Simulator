@@ -115,13 +115,13 @@ def get_testcase_two_agents(policies=['learning', 'GA3C_CADRL'], sensors=['other
         ]
     return agents
 
-def get_testcase_two_agents_maps(policies=['learning', 'GA3C_CADRL'], sensors=['other_agents_states']):
+def get_testcase_two_agents_maps(policies=['learning', 'GA3C_CADRL'], radius=0.5, sensors=['other_agents_states']):
     goal_x = 6
     goal_y = 6
     sensor_classes = [sensor_dict[sensor] for sensor in sensors]
     agents = [
-        Agent(-goal_x, -goal_y, goal_x, goal_y, 0.5, 1.0, 0.0, policy_dict[policies[0]], UnicycleDynamics, sensor_classes, 0),
-        Agent(goal_x, goal_y, -goal_x, -goal_y, 0.5, 1.0, np.pi, policy_dict[policies[1]], UnicycleDynamics, sensor_classes, 1)
+        Agent(-goal_x, -goal_y, goal_x, goal_y, radius, 1.0, 0.0, policy_dict[policies[0]], UnicycleDynamics, sensor_classes, 0),
+        Agent(goal_x, goal_y, -goal_x, -goal_y, radius, 1.0, np.pi, policy_dict[policies[1]], UnicycleDynamics, sensor_classes, 1)
         ]
     return agents
 
