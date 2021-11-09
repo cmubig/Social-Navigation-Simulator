@@ -7,13 +7,13 @@ SOURCE_VENV=${2:-true}
 # Directory of this script
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-if $MAKE_VENV; then
-    # Virtualenv w/ python3
-    export PYTHONPATH=/usr/bin/python3 # point to your python3
-    python3 -m pip install virtualenv
-    cd $DIR
-    python3 -m virtualenv venv
-fi
+# if $MAKE_VENV; then
+#     # Virtualenv w/ python3
+#     export PYTHONPATH=/usr/bin/python3 # point to your python3
+#     python3 -m pip install virtualenv
+#     cd $DIR
+#     python3 -m virtualenv venv
+# fi
 
 if $SOURCE_VENV; then
     cd $DIR
