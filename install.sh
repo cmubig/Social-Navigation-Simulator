@@ -15,11 +15,11 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 #     python3 -m virtualenv venv
 # fi
 
-if $SOURCE_VENV; then
-    cd $DIR
-    source venv/bin/activate
-    export PYTHONPATH=${DIR}/venv/bin/python/dist-packages
-fi
+# if $SOURCE_VENV; then
+#     cd $DIR
+#     source venv/bin/activate
+#     export PYTHONPATH=${DIR}/venv/bin/python/dist-packages
+# fi
 
 # Install this pkg and its requirements
 python -m pip install -e $DIR

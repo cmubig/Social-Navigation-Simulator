@@ -17,6 +17,7 @@ def create_env():
 
         # The env provides a dict observation by default. Most RL code
         # doesn't handle dict observations, so these wrappers convert to arrays
+        # print(Config.TRAIN_SINGLE_AGENT)
         if Config.TRAIN_SINGLE_AGENT:
             # only return observations of a single agent
             env = FlattenDictWrapper(env, dict_keys=Config.STATES_IN_OBS)
@@ -29,6 +30,7 @@ def create_env():
         return env
     
     # To be prepared for training on multiple instances of the env at once
+    # calls the nested function make_env to create a new multi env instance
     if Config.TRAIN_SINGLE_AGENT:
         env = DummyVecEnv([make_env for _ in range(num_envs)])
     else:
@@ -50,7 +52,7 @@ def run_episode(env, one_env):
         obs, rew, done, info = env.step([None])
 
         #dynamic number of agent messes with the dimension of reward, comment for now, require fix in future
-        #total_reward += rew[0]
+        total_reward += rew[0]
         step += 1
 
     # After end of episode, store some statistics about the environment
@@ -60,6 +62,7 @@ def run_episode(env, one_env):
         'steps': step,
     }
 
+    # all environment stats
     agents = one_env.agents
     # agents = one_env.prev_episode_agents
     time_to_goal = np.array([a.t for a in agents])
@@ -97,7 +100,7 @@ def store_stats(df, hyperparameters, episode_stats):
     df = df.append(df_columns, ignore_index=True)
     return df
 
-
+# list of available policies
 policies = {
 
     'GA3C-CADRL-10-WS-4-1': {

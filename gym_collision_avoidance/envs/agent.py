@@ -110,20 +110,14 @@ class Agent(object):
         if start_step_num is None or start_t is None:
             self.t = 0.0
             self.step_num = 0
-
-
-        else:
-            
+        else:     
             self.t = start_t
             self.step_num = start_step_num
             
         self.start_t = self.t
         self.start_step_num = self.step_num
-
-    
+   
         self.past_traj = None
-
-
 
         # Other parameters
         if radius is not None:
@@ -131,15 +125,12 @@ class Agent(object):
         if pref_speed is not None:
             self.pref_speed = pref_speed
 
-
         self.straight_line_time_to_reach_goal = (np.linalg.norm(self.pos_global_frame - self.goal_global_frame) - self.near_goal_threshold)/self.pref_speed
         if Config.EVALUATE_MODE or Config.PLAY_MODE:
             self.time_remaining_to_reach_goal = Config.agent_time_out - self.start_t #Config.MAX_TIME_RATIO*self.straight_line_time_to_reach_goal
         else:
             self.time_remaining_to_reach_goal = Config.agent_time_out - self.start_t #Config.MAX_TIME_RATIO*self.straight_line_time_to_reach_goal
         self.time_remaining_to_reach_goal = max(self.time_remaining_to_reach_goal, self.dt_nominal)
-
-
         
         self.is_at_goal = False
         self.was_at_goal_already = False

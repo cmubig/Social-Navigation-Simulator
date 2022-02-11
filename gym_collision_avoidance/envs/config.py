@@ -1,6 +1,6 @@
 import numpy as np
-#from gym_collision_avoidance.experiments.src.master_config import Master_Config
-from gym_collision_avoidance.experiments.src.master_config_deploy import Master_Config
+from gym_collision_avoidance.experiments.src.master_config import Master_Config
+# from gym_collision_avoidance.experiments.src.master_config_deploy import Master_Config
 master_config = Master_Config()
 
 class Config(object):
@@ -189,6 +189,32 @@ class Config(object):
                 self.MEAN_OBS[state] = self.STATE_INFO_DICT[state]['mean']
             if 'std' in self.STATE_INFO_DICT[state]:
                 self.STD_OBS[state] = self.STATE_INFO_DICT[state]['std']
+
+
+class Train(Config):
+    def __init__(self):
+        Config.__init__(self)
+        self.STATES_IN_OBS = ['dist_to_goal','heading_ego_frame','pref_speed','radius','other_agent_states']
+        self.TRAIN_SINGLE_AGENT = True # train only one agent (multi-agent possible)
+        self.MAX_NUM_AGENTS_IN_ENVIRONMENT = 2
+        self.MAX_NUM_AGENTS_TO_SIM = 2
+        self.TEST_CASE_ARGS['num_agents'] = 2
+        self.TEST_CASE_ARGS['policy_to_ensure'] = 'learning_dqn'
+        self.TEST_CASE_ARGS['policies'] = ['learning_dqn', 'learning']
+        self.agent_time_out                    = master_config.agent_time_out
+        self.DT                              = master_config.DT
+        self.MAX_TIME_RATIO                  = master_config.MAX_TIME_RATIO
+        self.SAVE_EPISODE_PLOTS                = master_config.SAVE_EPISODE_PLOTS
+        self.SHOW_EPISODE_PLOTS                = master_config.SHOW_EPISODE_PLOTS
+        self.ANIMATE_EPISODES                  = master_config.ANIMATE_EPISODES
+        self.NEAR_GOAL_THRESHOLD               = master_config.NEAR_GOAL_THRESHOLD
+        self.PLT_LIMITS                        = [[-10, 10], [-10, 10]]
+        self.PLT_FIG_SIZE                      = master_config.PLT_FIG_SIZE
+        self.PLOT_CIRCLES_ALONG_TRAJ           = master_config.PLOT_CIRCLES_ALONG_TRAJ
+        self.NUM_AGENTS_TO_TEST                = master_config.NUM_AGENTS_TO_TEST
+        self.POLICIES_TO_TEST                  = master_config.POLICIES_TO_TEST
+        self.NUM_TEST_CASES                    = master_config.NUM_TEST_CASES
+
 
 class EvaluateConfig(Config):
     def __init__(self):
