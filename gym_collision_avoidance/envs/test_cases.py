@@ -32,6 +32,7 @@ from gym_collision_avoidance.envs.policies.LearningPolicy import LearningPolicy
 from gym_collision_avoidance.envs.policies.CARRLPolicy import CARRLPolicy
 from gym_collision_avoidance.envs.policies.LearningPolicyGA3C import LearningPolicyGA3C
 from gym_collision_avoidance.envs.policies.LearningPolicyDQN import LearningPolicyDQN
+from gym_collision_avoidance.envs.policies.LearningPolicyCADRL import LearningPolicyCADRL
 
 from gym_collision_avoidance.envs.policies.NAVIGANPolicy import NAVIGANPolicy
 from gym_collision_avoidance.envs.policies.STGCNNPolicy import STGCNNPolicy
@@ -71,6 +72,7 @@ policy_dict = {
     'learning': LearningPolicy,
     'learning_ga3c': LearningPolicyGA3C,
     'learning_dqn': LearningPolicyDQN,
+    'learning_cadrl': LearningPolicyCADRL,
     'static': StaticPolicy,
     'CADRL': CADRLPolicy,
     'NAVIGAN' : NAVIGANPolicy,
@@ -111,14 +113,14 @@ def get_testcase_two_agents(policies=['learning', 'learning']):
         ]
     return agents
 
-def get_testcase_one_train(policies=['learning_dqn', 'learning']):
-    adv_goal_x = 3
+def get_testcase_one_train(policies=['learning_cadrl', 'learning']):
+    adv_goal_x = 0
     adv_goal_y = 3
-    learner_goal_x = -1
-    learner_goal_y = -1
+    learner_goal_x = 1
+    learner_goal_y = 0
     agents = [
         Agent(0, 0, learner_goal_x, learner_goal_y, 0.5, 1.0, 0.0, policy_dict[policies[0]], UnicycleDynamics, [OtherAgentsStatesSensor], 0),
-        Agent(adv_goal_x, adv_goal_y, -adv_goal_x, -adv_goal_y, 0.5, 1.0, np.pi, policy_dict[policies[1]], UnicycleDynamics, [OtherAgentsStatesSensor], 1)
+        Agent(3, 3, adv_goal_x, adv_goal_y, 0.5, 1.0, np.pi, policy_dict[policies[1]], UnicycleDynamics, [OtherAgentsStatesSensor], 1)
         ]
     return agents
 

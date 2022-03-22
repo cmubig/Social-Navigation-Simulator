@@ -203,7 +203,8 @@ class CollisionAvoidanceEnv(gym.Env):
         self.active_agents_per_timestep = dict()
 
         self.replaced_agent_mask = None # agent that arrived will be removed and replace by a new agent
-        
+
+
     def step(self, actions, dt=None):
         """ Run one timestep of environment dynamics.
 
@@ -306,7 +307,7 @@ class CollisionAvoidanceEnv(gym.Env):
         # agents_inside_field = self._check_which_agents_inside_field()
 
         
-        self.active_agent_mask = self.active_agent_mask & agents_still_running
+        # self.active_agent_mask = self.active_agent_mask & agents_still_running
   
         #add agents here
         #take in-active agents and re-add them as new agents with timestamp of now. 

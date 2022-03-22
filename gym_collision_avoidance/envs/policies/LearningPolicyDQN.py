@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 
 from gym_collision_avoidance.envs.policies.LearningPolicy import LearningPolicy
 from gym_collision_avoidance.envs.policies.DQN import network
@@ -16,6 +17,8 @@ class LearningPolicyDQN(LearningPolicy):
         self.external_action = np.zeros(self.possible_actions.num_actions)
         self.step_counter = 0
         self.nA = self.possible_actions.num_actions
+        self.episode = 0
+        print(self.possible_actions.actions)
 
     def init_network(self, nA, nS):
         # initialize DQN with nA = number of actions, nS = size of state representation vector
@@ -26,6 +29,10 @@ class LearningPolicyDQN(LearningPolicy):
     def get_action(self, state, eps):
         return self.agents[0].eps_greedy(state, self.nA , eps)
 
+    def save_checkpoint(self, name):
+        torch.save(self.agents[0].Q_policy.state_dict(), name+".pth")
+
+    
     def learn_step(self,state,action,reward,next_state):
         self.step_counter+=1
         print("learner step: ", self.step_counter)

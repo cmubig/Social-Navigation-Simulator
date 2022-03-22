@@ -1,6 +1,7 @@
 import numpy as np
 from gym_collision_avoidance.envs import Config
 from gym_collision_avoidance.envs.util import wrap, find_nearest
+from gym_collision_avoidance.envs.policies.LearningCADRL.sim_utils.state import ObservableState, FullState
 import operator
 import math
 
@@ -41,6 +42,7 @@ class Agent(object):
         self.collision_cooldown = self.collision_stop_countdown + 20  #20 * 0.1s
         self.num_actions_to_store = 2
         self.action_dim = 2
+        self.kinematics = "nonholonomic"
         
         self.id = id
         self.dist_to_goal = 0.0
@@ -408,12 +410,41 @@ class Agent(object):
         ego_state = np.array([self.t, self.dist_to_goal, self.heading_ego_frame])
         return global_state, ego_state
 
+    def compute_position(self, action, delta_t):
+        if self.kinematics == 'holonomic':
+            px = self.px + action.vx * delta_t
+            py = self.py + action.vy * delta_t
+        else:
+            theta = self.heading_ego_frame + action.r
+            px = self.pos_global_frame[0] + np.cos(theta) * action.v * delta_t
+            py = self.pos_global_frame[1] + np.sin(theta) * action.v * delta_t
+
+        return px, py
+
+    def get_observable_state(self):
+        return ObservableState(self.pos_global_frame[0], self.pos_global_frame[1], self.vel_global_frame[0], self.vel_global_frame[1], self.radius)
+
+    def get_next_observable_state(self, action):
+        # self.check_validity(action)
+        pos = self.compute_position(action, self.t)
+        next_px, next_py = pos
+        if self.kinematics == 'holonomic':
+            next_vx = action.vx
+            next_vy = action.vy
+        else:
+            next_theta = self.heading_ego_frame + action.r
+            next_vx = action.v * np.cos(next_theta)
+            next_vy = action.v * np.sin(next_theta)
+        return ObservableState(next_px, next_py, next_vx, next_vy, self.radius)
+
+    def get_full_state(self):
+        return FullState(self.pos_global_frame[0], self.pos_global_frame[1], self.vel_global_frame[0], self.vel_global_frame[1], self.radius, self.goal_global_frame[0], self.goal_global_frame[1], self.pref_speed, self.heading_ego_frame)
+
     def get_sensor_data(self, sensor_name):
         """ Extract the latest measurement from the sensor by looking up in the self.sensor_data dict (which is populated by the self.sense method. 
 
         Args:
             sensor_name (str): name of the sensor (e.g., 'laserscan', I think from Sensor.str?)
-    
         """
         if sensor_name in self.sensor_data:
             return self.sensor_data[sensor_name]

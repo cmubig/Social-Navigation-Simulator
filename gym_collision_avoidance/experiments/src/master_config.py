@@ -37,7 +37,7 @@ class Master_Config(object):
         self.MAX_NUM_AGENTS_IN_ENVIRONMENT = number_of_agent+1 
         self.MAX_NUM_OTHER_AGENTS_OBSERVED = number_of_agent
 
-        self.agent_time_out          = 180 #180  #30 motion prediction
+        self.agent_time_out    = 200 #180  #30 motion prediction
 
 #       num mean        num std dev      vel mean       vel std dev   x_min             x_max   y_min   y_max
 #ETH    6.312138728	4.536521361      2.339926573	0.7502205478  -7.69	        14.42	-3.17	13.21

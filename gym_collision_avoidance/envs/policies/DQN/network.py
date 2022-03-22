@@ -11,8 +11,8 @@ import sys
 
 # device=T.device("cuda:0")
 device=T.device("cpu")
-random.seed(42)
-np.random.seed(42)
+# random.seed(42)
+# np.random.seed(42)
 # T.manual_seed(0)
 
 class Actions():
@@ -21,9 +21,10 @@ class Actions():
     # [0.5*v_pref,  [-pi/6, 0, pi/6]]
     # [0,           [-pi/6, 0, pi/6]]
     def __init__(self):
-        self.actions = np.mgrid[1.0:1.1:0.5, -np.pi/6:np.pi/6+0.01:np.pi/12].reshape(2, -1).T
-        self.actions = np.vstack([self.actions,np.mgrid[0.5:0.6:0.5, -np.pi/6:np.pi/6+0.01:np.pi/6].reshape(2, -1).T])
-        self.actions = np.vstack([self.actions,np.mgrid[0.0:0.1:0.5, -np.pi/6:np.pi/6+0.01:np.pi/6].reshape(2, -1).T])
+        # self.actions = np.mgrid[1.0:1.1:0.5, -np.pi/6:np.pi/6+0.01:np.pi/12].reshape(2, -1).T
+        # self.actions = np.vstack([self.actions,np.mgrid[0.5:0.6:0.5, -np.pi/6:np.pi/6+0.01:np.pi/6].reshape(2, -1).T])
+        # self.actions = np.vstack([self.actions,np.mgrid[0.0:0.1:0.5, -np.pi/6:np.pi/6+0.01:np.pi/6].reshape(2, -1).T])
+        self.actions = np.array([[1.0, 0.0], [0.5,0.0], [0.0, -np.pi/6], [0.0, np.pi/6], [0.0, -np.pi/12], [0.0, np.pi/12]])
         self.num_actions = len(self.actions)
 
 # The Pytorch nn.Module Class for the DQNetwork model
@@ -33,17 +34,35 @@ class PatNet(nn.Module):
         super(PatNet,self).__init__()
         self.nA=nA
         self.input_dims=nS
-        self.fc1=nn.Linear(self.input_dims, 128)    # 1st Hidden Layer
-        self.fc2=nn.Linear(128, 84)                # 2nd Hidden Layer
-        self.fc3=nn.Linear(84, self.nA)            # Output Layer
+        self.fc1=nn.Linear(self.input_dims, 84)    # 1st Hidden Layer
+        self.fc2=nn.Linear(84, 128)                # 2nd Hidden Layer
+        self.fc3=nn.Linear(128, 64)                # 3rd Hidden Layer
+        self.fc4=nn.Linear(64, self.nA)            # Output Layer
         # self.dropout=nn.Dropout(p=0.2)              # Dropout
 
     def forward(self, observation):
         observation=F.relu(self.fc1(observation))
         observation=F.relu(self.fc2(observation))
-        qsa=self.fc3(observation)
+        observation=F.relu(self.fc3(observation))
+        qsa=self.fc4(observation)
 
         return qsa
+
+    # def __init__(self, nA, nS):
+    #     super(PatNet,self).__init__()
+    #     self.nA=nA
+    #     self.input_dims=nS
+    #     self.fc1=nn.Linear(self.input_dims, 84)    # 1st Hidden Layer
+    #     self.fc2=nn.Linear(84, 128)                # 2nd Hidden Layer
+    #     self.fc3=nn.Linear(128, self.nA)            # Output Layer
+    #     # self.dropout=nn.Dropout(p=0.2)              # Dropout
+
+    # def forward(self, observation):
+    #     observation=F.relu(self.fc1(observation))
+    #     observation=F.relu(self.fc2(observation))
+    #     qsa=self.fc3(observation)
+
+    #     return qsa
 
 #end of network class
 
@@ -51,13 +70,13 @@ class Agent():
     # HYPERPARAMTERS
     def __init__(self, nA, nS):
         self.GAMMA      = 0.95      # Discounted Return
-        self.LEARN_PER  = 1         # Q-policy update time interval
-        self.UPD_PER    = 2         # Fixed Q-target update time interval
+        self.LEARN_PER  = 20         # Q-policy update time interval
+        self.UPD_PER    = 40         # Fixed Q-target update time interval
         self.TAU        = 0.001     # Soft update of target params
 
-        self.mem_size   = 10000    # Replay buffer size
-        self.batch_size = 32       # Training batch size
-        self.lr         = 0.00075   # opimizer learning rate
+        self.mem_size   = 40000    # Replay buffer size
+        self.batch_size = 128       # Training batch size
+        self.lr         = 0.0005   # opimizer learning rate
         self.momentum   = 0.9       # SGD momentum
         self.exp_gamma  = 0.96      # lr scheduler exp decay rate
 
@@ -104,11 +123,13 @@ class Agent():
         # print(action_values)
         # action_values=[action_values.reshape(-1)[i] for i in acts]
         # Select action based on exploration-exploitation epsilon-greddy strategy
-        print(action_values)
-        if random.random() > eps:
-            max_acts = np.argwhere(action_values == np.amax(action_values))
+        print("Q(s,a)",action_values[0])
+        # print("Q(s,a)",np.argwhere(action_values[0] == np.amax(action_values[0])))
 
-            return np.random.choice([i for i in max_acts.reshape(-1)])
+        if random.random() > eps:
+            max_acts = np.argwhere(action_values[0] == np.amax(action_values[0]))
+            print(max_acts)
+            return np.random.choice(max_acts[0])
         else:
             print("random action !! eps=", eps)
             return np.random.randint(0,nA)
@@ -119,7 +140,7 @@ class Agent():
 
         # Get the next_state target Q-values from target network
         # Calculate current_state target Q-values using Bellman Optimality Equation
-        print(next_states.shape)
+        # print(next_states.shape)
         Q_targets_next= self.Q_target(next_states).detach().max(1)[0].unsqueeze(1)
         Q_targets = rewards + (gamma*Q_targets_next)
 
@@ -127,8 +148,8 @@ class Agent():
         Q_expects=self.Q_policy(states).gather(1,actions)
 
         # Compute and minimize the loss and update weights of policy network
-        loss = self.criterion(Q_expects,Q_targets)
         self.optimizer.zero_grad()
+        loss = self.criterion(Q_expects,Q_targets)
         loss.backward()
         self.optimizer.step()
 

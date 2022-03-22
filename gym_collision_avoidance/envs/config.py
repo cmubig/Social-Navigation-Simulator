@@ -13,7 +13,7 @@ class Config(object):
 
         ### DISPLAY
         self.ANIMATE_EPISODES    = True
-        self.SHOW_EPISODE_PLOTS = False
+        self.SHOW_EPISODE_PLOTS = True
         self.SAVE_EPISODE_PLOTS = True
         if not hasattr(self, "PLOT_CIRCLES_ALONG_TRAJ"):
             self.PLOT_CIRCLES_ALONG_TRAJ = True
@@ -35,7 +35,7 @@ class Config(object):
         self.REWARD_COLLISION_WITH_WALL = -0.25 # reward given when agent collides with wall
         self.REWARD_GETTING_CLOSE   = -0.1 # reward when agent gets close to another agent (unused?)
         self.REWARD_ENTERED_NORM_ZONE   = -0.05 # reward when agent enters another agent's social zone
-        self.REWARD_TIME_STEP   = 0.0 # default reward given if none of the others apply (encourage speed)
+        self.REWARD_TIME_STEP   = -0.0 # default reward given if none of the others apply (encourage speed)
         self.REWARD_WIGGLY_BEHAVIOR = 0.0
         self.WIGGLY_BEHAVIOR_THRESHOLD = np.inf
         self.COLLISION_DIST = 0.0 # meters between agents' boundaries for collision
@@ -46,7 +46,7 @@ class Config(object):
 
         ### SIMULATION
         self.DT             = 0.2 # seconds between simulation time steps
-        self.NEAR_GOAL_THRESHOLD = 0.2
+        self.NEAR_GOAL_THRESHOLD = 0.3
         self.MAX_TIME_RATIO = 2. # agent has this number times the straight-line-time to reach its goal before "timing out"
         
         ### TEST CASE SETTINGS
@@ -194,13 +194,14 @@ class Config(object):
 class Train(Config):
     def __init__(self):
         Config.__init__(self)
+        print("::::::::::::Loading TRAIN CONFIG:::::::::::")
         self.STATES_IN_OBS = ['dist_to_goal','heading_ego_frame','pref_speed','radius','other_agent_states']
         self.TRAIN_SINGLE_AGENT = True # train only one agent (multi-agent possible)
         self.MAX_NUM_AGENTS_IN_ENVIRONMENT = 2
         self.MAX_NUM_AGENTS_TO_SIM = 2
         self.TEST_CASE_ARGS['num_agents'] = 2
-        self.TEST_CASE_ARGS['policy_to_ensure'] = 'learning_dqn'
-        self.TEST_CASE_ARGS['policies'] = ['learning_dqn', 'learning']
+        self.TEST_CASE_ARGS['policy_to_ensure'] = 'learning_cadrl'
+        self.TEST_CASE_ARGS['policies'] = ['learning_cadrl', 'learning']
         self.agent_time_out                    = master_config.agent_time_out
         self.DT                              = master_config.DT
         self.MAX_TIME_RATIO                  = master_config.MAX_TIME_RATIO
@@ -214,7 +215,6 @@ class Train(Config):
         self.NUM_AGENTS_TO_TEST                = master_config.NUM_AGENTS_TO_TEST
         self.POLICIES_TO_TEST                  = master_config.POLICIES_TO_TEST
         self.NUM_TEST_CASES                    = master_config.NUM_TEST_CASES
-
 
 class EvaluateConfig(Config):
     def __init__(self):
@@ -238,7 +238,6 @@ class Example(EvaluateConfig):
         self.NUM_AGENTS_TO_TEST                = master_config.NUM_AGENTS_TO_TEST
         self.POLICIES_TO_TEST                  = master_config.POLICIES_TO_TEST
         self.NUM_TEST_CASES                    = master_config.NUM_TEST_CASES
-
 
         self.MAX_NUM_AGENTS_IN_ENVIRONMENT     = master_config.MAX_NUM_AGENTS_IN_ENVIRONMENT
         self.MAX_NUM_OTHER_AGENTS_OBSERVED     = master_config.MAX_NUM_OTHER_AGENTS_OBSERVED
