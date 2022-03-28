@@ -148,7 +148,7 @@ class CADRL(Policy):
                 next_theta = state.theta + action.r
                 next_vx = action.v * np.cos(next_theta)
                 next_vy = action.v * np.sin(next_theta)
-                print(state.px, self.time_step, "propagate")
+                # print(state.px, self.time_step, "propagate")
                 next_px = state.px + next_vx * self.time_step
                 next_py = state.py + next_vy * self.time_step
                 next_state = FullState(next_px, next_py, next_vx, next_vy, state.radius, state.gx, state.gy,
@@ -192,7 +192,7 @@ class CADRL(Policy):
 
         # check if reaching the goal
 
-        reaching_goal = np.linalg.norm(np.array(state_agent.px,state_agent.py) - np.array(state_agent.gx,state_agent.gy)) < state_agent.radius
+        reaching_goal = np.linalg.norm(np.array(state_agent.px,state_agent.py) - np.array(state_agent.gx,state_agent.gy)) < state_agent.radius/2
 
         if collision:
             reward = -0.25
@@ -215,6 +215,7 @@ class CADRL(Policy):
         thus the reward function is needed
 
         """
+        print("predict")
         if self.phase is None or self.device is None:
             raise AttributeError('Phase, device attributes have to be set!')
         if self.phase == 'train' and self.epsilon is None:
@@ -227,15 +228,17 @@ class CADRL(Policy):
 
         probability = np.random.random()
         if self.phase == 'train' and probability < self.epsilon:
+            print("random action, eps: ", self.epsilon)
             max_action = self.action_space[np.random.choice(len(self.action_space))]
         else:
+            print("predicted action")
             self.action_values = list()
             max_min_value = float('-inf')
             max_action = None
             for action in self.action_space:
                 next_self_state = self.propagate(state.self_state, action)
                 ob = self.next_step_lookahead
-                print(next_self_state, ob[0], "nss")
+                # print(next_self_state, ob[0], "nss")
                 reward = self.predict_reward(next_self_state, ob[0], action)
 
                 batch_next_states = torch.cat([torch.Tensor([next_self_state + next_human_state]).to(self.device)
@@ -251,7 +254,7 @@ class CADRL(Policy):
 
         if self.phase == 'train':
             self.last_state = self.transform(state)
-
+        print("selected action", max_action)
         return max_action
 
     def transform(self, state):

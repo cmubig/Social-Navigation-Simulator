@@ -184,7 +184,7 @@ class Agent(object):
     def _check_if_at_goal(self):
         """ Set :code:`self.is_at_goal` if norm(pos_global_frame - goal_global_frame) <= near_goal_threshold """
         is_near_goal = (self.pos_global_frame[0] - self.goal_global_frame[0])**2 + (self.pos_global_frame[1] - self.goal_global_frame[1])**2 <= self.near_goal_threshold**2
-
+        print("agent near goal?: ", self.near_goal_threshold**2, (self.pos_global_frame[0] - self.goal_global_frame[0])**2 + (self.pos_global_frame[1] - self.goal_global_frame[1])**2,is_near_goal)
 
         self.is_at_goal = is_near_goal
 

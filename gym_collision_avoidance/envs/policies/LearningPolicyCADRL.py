@@ -21,6 +21,8 @@ class LearningPolicyCADRL(LearningPolicy):
         # self.external_action = np.zeros(self.possible_actions.num_actions)
         self.step_counter = 0
         self.episode = 0
+        self.v_pref = 0
+        self.dt = 0
         self.parser = argparse.ArgumentParser('Parse configuration file')
         # self.nA = self.possible_actions.num_actions
         self.gamma = 0.9
@@ -81,18 +83,22 @@ class LearningPolicyCADRL(LearningPolicy):
         # self.robot.print_info()
         # reinforcement learning
         self.trainer.set_learning_rate(self.rl_learning_rate)
+        self.target_model = copy.deepcopy(self.model)
 
     def get_action(self, state, eps):
+        
         return self.agents[0].eps_greedy(state, self.nA , eps)
 
     def save_checkpoint(self, name):
-        torch.save(self.policy_trainer.model, name+".pth")
+        torch.save(self.model, name+".pth")
     
     def act(self, state):
         action = self.policy.predict(state)
         return action
 
     def update_memory(self, states, action, rewards):
+        self.v_pref = states[0][1]
+        print("v_pref: ", self.v_pref)
         if self.memory is None or self.gamma is None:
             raise ValueError('Memory or gamma value is not set!')
 
@@ -105,7 +111,7 @@ class LearningPolicyCADRL(LearningPolicy):
                 value = reward
             else:
                 next_state = states[i + 1]
-                gamma_bar = pow(self.gamma, self.robot.time_step * self.robot.v_pref)
+                gamma_bar = pow(self.gamma, self.dt * self.v_pref)
                 value = reward + gamma_bar * self.target_model(next_state.unsqueeze(0)).data.item()
             value = torch.Tensor([value]).to(self.device)
 

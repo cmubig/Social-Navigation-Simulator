@@ -15,11 +15,11 @@ class FullState(object):
         self.velocity = (self.vx, self.vy)
 
     def __add__(self, other):
-        print("state __add__")
+        # print("state __add__")
         return other + (self.px, self.py, self.vx, self.vy, self.radius, self.gx, self.gy, self.v_pref, self.theta)
 
     def __str__(self):
-        print("state __str__")
+        # print("state __str__")
         return ' '.join([str(x) for x in [self.px, self.py, self.vx, self.vy, self.radius, self.gx, self.gy,
                                           self.v_pref, self.theta]])
 

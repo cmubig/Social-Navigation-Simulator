@@ -1,5 +1,6 @@
 from argparse import ArgumentError
 import os
+from turtle import setworldcoordinates
 import numpy as np
 import gym
 # import cv2
@@ -31,12 +32,12 @@ def run_k_episodes(one_env, num_episodes, phase, agents, update_memory=False, ep
     # num_episodes = 500
     agents[0].policy.policy.set_phase(phase)
     agents[0].policy.policy.time_step = Config.DT
+    agents[0].policy.dt = Config.DT
     agents[0].policy.policy.set_env(one_env)
-    num_steps = 150
-    init_pos_min_x = -1.5             # minimum initial position
-    init_pos_min_y = -1.5
-    init_pos_max_x = 1.5              # maximum initial position
-    init_pos_max_y = 1.5
+    init_pos_min_x = -3             # minimum initial position
+    init_pos_min_y = -3
+    init_pos_max_x = 3              # maximum initial position
+    init_pos_max_y = 3
     distance_reward_factor = -0.005     # reward factor for deviating from straight line path
 
     # Repeatedly send actions to the environment based on agents' observations
@@ -47,12 +48,13 @@ def run_k_episodes(one_env, num_episodes, phase, agents, update_memory=False, ep
 
     # Learning agent parameters
     num_state_vector = 14
-    
+    num_steps = 150    
 
     next_state = np.zeros(num_state_vector, dtype=np.float32)
     curr_state = np.zeros(num_state_vector, dtype=np.float32)
 
     goal_count = 0
+    coll_count = 0
 
     gx = 1
     # training metrics
@@ -66,7 +68,7 @@ def run_k_episodes(one_env, num_episodes, phase, agents, update_memory=False, ep
         states = []
         acts = []
         rews = []
-        for j in range(len(agents)-1):
+        for j in range(len(agents)):
             agents[j].reset(px=np.random.uniform(init_pos_min_x, init_pos_max_x),
                             py=np.random.uniform(init_pos_min_y, init_pos_max_y),
                             # heading=np.random.uniform(0, 2*np.pi),
@@ -75,6 +77,7 @@ def run_k_episodes(one_env, num_episodes, phase, agents, update_memory=False, ep
             agents[j].is_done = False
             agents[j].is_out_of_bounds = False
             agents[j].ran_out_of_time = False
+        dist2goal = np.linalg.norm(np.array([agents[0].goal_global_frame[0], agents[0].goal_global_frame[1]]) - np.array([agents[0].pos_global_frame[0], agents[0].pos_global_frame[1]]))
         next_state[0] = agents[0].pos_global_frame[0]
         next_state[1] = agents[0].pos_global_frame[1]
         next_state[2] = agents[0].vel_global_frame[0]
@@ -99,16 +102,18 @@ def run_k_episodes(one_env, num_episodes, phase, agents, update_memory=False, ep
             # e.g., actions[0] = external_policy(dict_obs[0])
             actions = {}
             print(":::::::::::::::::")
-            print("\nepisode number", k+1, "agents: ", len(agents))
+            print("\nepisode number", episode, "agents: ", len(agents))
 
             p_err = err
             curr = agents[1].heading_global_frame
             err = set_point - agents[1].heading_global_frame
             control = np.clip(P*err, -1, 1)/2.0 + 0.5
-            # control = -np.pi/6
-            actions[1] = np.array([0.0, control])
 
-            other_action = ActionRot(0.0,control)
+            # control = -np.pi/24
+            v_x = 0.5
+            actions[1] = np.array([v_x, control])
+
+            other_action = ActionRot(v_x,control)
 
             other_agent_state = agents[1].get_next_observable_state(other_action)
             
@@ -130,11 +135,14 @@ def run_k_episodes(one_env, num_episodes, phase, agents, update_memory=False, ep
             # Run a simulation step (check for collisions, move sim agents)
             obs, rewards, game_over, which_agents_done = one_env.step(actions)
             # print("obs", obs)
-            
+            if agents[0].is_at_goal:
+                rewards-= (i-dist2goal/agents[0].pref_speed)/num_steps
+            states.append(agents[0].policy.policy.last_state)
+            acts.append(rl_action)
+            rews.append(rewards)
 
             # rewards+= distance_reward_factor*distance_penalty(init_state[0], init_state[1], agents[0].pos_global_frame)
-            if agents[0].is_at_goal:
-                rewards-= i/num_steps
+            
             cumul_reward += rewards
             print("done 0? ", agents[0].is_at_goal, agents[0].is_done, agents[0].ran_out_of_time, agents[0].is_out_of_bounds)
             print("done 1? ", agents[1].is_at_goal, agents[1].is_done, agents[1].ran_out_of_time, agents[1].is_out_of_bounds)
@@ -149,8 +157,8 @@ def run_k_episodes(one_env, num_episodes, phase, agents, update_memory=False, ep
             next_state[6] = agents[0].goal_global_frame[1]
             next_state[7] = agents[0].pref_speed
             next_state[8] = agents[0].heading_ego_frame
-            for i in range(9,num_state_vector):
-                next_state[i] = obs[0]['other_agent_states'][i-9]
+            for l in range(9,num_state_vector):
+                next_state[l] = obs[0]['other_agent_states'][l-9]
 
             # cumulative_rewards.append(sum([pow(self.gamma, t * self.robot.time_step * self.robot.v_pref)
                                         #    * reward for t, reward in enumerate(rewards)]))
@@ -170,16 +178,18 @@ def run_k_episodes(one_env, num_episodes, phase, agents, update_memory=False, ep
             if update_memory:
                 if agents[0].is_at_goal or agents[0].in_collision:
                     # only add positive(success) or negative(collision) experience in experience set
-                    
-                    agents[0].policy.update_memory(states, actions, rewards)
+                    print("updating memory of size: ", len(states))
+                    agents[0].policy.update_memory(states, acts, rews)
             
             if(agents[0].is_at_goal):
                 goal_count+=1
                 print("Agent has reached goal")
-                time_to_goal = i
+
+                time_to_goal = i-dist2goal/agents[0].pref_speed
                 break
             
             if(agents[0].in_collision):
+                coll_count+=1
                 print("Agent has collided")
                 break
 
@@ -193,10 +203,11 @@ def run_k_episodes(one_env, num_episodes, phase, agents, update_memory=False, ep
                 # break
         # if end:
             # break
-        # success_rate_list.append(100*goal_count/(k+1))
-        # time_to_goal_list.append(time_to_goal)
-        # scores.append(cumul_reward)
-        
+    success_rate_list.append(100*goal_count/(k+1))
+    time_to_goal_list.append(time_to_goal)
+    scores.append(cumul_reward)
+    
+    return goal_count, time_to_goal_list, scores, coll_count
         # if phase in ['val', 'test']:
             # num_step = sum(success_times + collision_times + timeout_times) / self.robot.time_step
             # logging.info('Frequency of being in danger: %.2f and average min separate distance in danger: %.2f',
@@ -239,63 +250,104 @@ def main():
     train_episodes = 100
     val_size = 100
 
-    eps_start = 0.95                # exploration probability at start
+    eps_start = 0.5                # exploration probability at start
     eps_end = 0.1                   # exploration probability at end
-    eps_dec = 0.993                 # exploration probability decay factor
+    eps_dec = 4000                 # exploration probability decay factor
     eps = eps_start                 # exploration probability
 
     # explorer
 
-    agents[0].policy.policy.set_epsilon(eps)
-    run_k_episodes(one_env, 100, 'train', agents, update_memory=True, episode=0)
+    agents[0].policy.policy.set_epsilon(0.6)
+    run_k_episodes(one_env, 10, 'train', agents, update_memory=True, episode=0)
     env.reset()
     episode = 0 
-    while episode < agents[0].policy.network.train_episodes:
+    total_goals = 0
+    total_colls = 0
+    num_episodes = 0
+    scores = []
+    time_to_goal_list = []
+    success_rate_list = []
+    while episode < agents[0].policy.train_episodes:
         agents[0].policy.policy.set_epsilon(eps)
-        if episode % agents[0].policy.network.evaluation_interval == 0:
-                run_k_episodes(one_env, val_size, 'val', agents, episode=episode)
-        run_k_episodes(one_env,agents[0].policy.network.sample_episodes, 'train', update_memory=True, episode=episode)
-        
-        agents[0].policy.network.trainer.optimize_batch(agents[0].policy.network.train_batches)
-        
+        # if episode % agents[0].policy.evaluation_interval == 0:
+                # run_k_episodes(one_env, val_size, 'val', agents, episode=episode)
+        goals, time_to_goal, score_list, colls = run_k_episodes(one_env,agents[0].policy.sample_episodes, 'train', agents, update_memory=True, episode=episode)
+        total_goals+=goals
+        total_colls+=colls
+        num_episodes+=agents[0].policy.sample_episodes
+        for score in score_list:
+            scores.append(score)
+        for time in time_to_goal:
+            time_to_goal_list.append(time)
+        # print("sample eps: ",agents[0].policy.sample_episodes)
+        agents[0].policy.trainer.optimize_batch(agents[0].policy.train_batches)
+        env.reset()
+        # one_env.reset()
         episode += 1
+        print("ep no" ,episode)
 
-        if (episode+1)%80 == 0:
-            eps = max(eps_end, eps_start + (eps_end - eps_start) / eps_dec * episode
-)
+        eps = max(eps_end, eps_start + (eps_end - eps_start) / eps_dec * episode)
     
-        if episode % agents[0].policy.network.target_update_interval == 0:
+        if episode % agents[0].policy.target_update_interval == 0:
             agents[0].policy.update_target_model()
 
-        if episode != 0 and episode % agents[0].policy.network.checkpoint_interval == 0:
+        if episode != 0 and episode % agents[0].policy.checkpoint_interval == 0:
             agents[0].policy.save_checkpoint('trained_checkpoint')
+    agents[0].policy.save_checkpoint('trained_checkpoint')
+    plt.figure(figsize=(12,8))
+    plt.plot(range(num_episodes), scores)
+    plt.xlim(-1, num_episodes+1)
+    plt.ylim(-2,3)
+    plt.xlabel('Episode')
+    plt.ylabel('Cumulative Reward')
+    plt.title('Cumulative Reward vs Episode')
+    plt.show()
+    plt.savefig('reward_plot.png')
 
-    run_k_episodes(one_env, 100, 'test', agents, episode=episode)
+    print("Test: Success Rate and Collisions: ",total_goals, total_colls)
 
-    # plt.figure(figsize=(12,8))
-    # plt.plot(range(num_episodes), scores)
-    # plt.xlim(-1, num_episodes+1)
-    # plt.ylim(-2,3)
-    # plt.xlabel('Episode')
-    # plt.ylabel('Cumulative Reward')
-    # plt.title('Cumulative Reward vs Episode')
+    plt.figure(figsize=(12,8))
+    plt.plot(range(num_episodes), time_to_goal_list)
+    plt.xlim(-1, num_episodes+1)
+    plt.ylim(0,255)
+    plt.xlabel('Episode')
+    plt.ylabel('Time to goal')
+    plt.title('Time to goal vs Episode')
+    plt.show()
+    plt.savefig('time_to_goal.png')
 
-    # plt.figure(figsize=(12,8))
-    # plt.plot(range(num_episodes), success_rate_list)
-    # plt.xlim(-1, num_episodes+1)
-    # plt.ylim(0,100)
-    # plt.xlabel('Episode')
-    # plt.ylabel('Success Rate')
-    # plt.title('Success Rate vs Episode')
+    total_goals = 0
+    total_colls = 0
+    num_episodes = 100
+    scores = []
+    time_to_goal_list = []
+    success_rate_list = []
 
-    # plt.figure(figsize=(12,8))
-    # plt.plot(range(num_episodes), time_to_goal_list)
-    # plt.xlim(-1, num_episodes+1)
-    # plt.ylim(0,255)
-    # plt.xlabel('Episode')
-    # plt.ylabel('Time to goal')
-    # plt.title('Time to goal vs Episode')
+    goals, time_to_goal, score_list, colls = run_k_episodes(one_env, 100, 'test', agents, episode=episode)
+    scores.append(i for i in score_list)
+    time_to_goal_list.append(j for j in time_to_goal)
+    success_rate_list.append(100*goals/(num_episodes+1))
+    
+    plt.figure(figsize=(12,8))
+    plt.plot(range(num_episodes), scores)
+    plt.xlim(-1, num_episodes+1)
+    plt.ylim(-2,3)
+    plt.xlabel('Episode')
+    plt.ylabel('Cumulative Reward')
+    plt.title('Test: Cumulative Reward vs Episode')
+    plt.savefig('reward_plot_test.png')
+    plt.show()
+    print("Test: Success Rate and Collisions: ",total_goals, total_colls)
 
+    plt.figure(figsize=(12,8))
+    plt.plot(range(num_episodes), time_to_goal_list)
+    plt.xlim(-1, num_episodes+1)
+    plt.ylim(0,255)
+    plt.xlabel('Episode')
+    plt.ylabel('Time to goal')
+    plt.title('Test: Time to goal vs Episode')
+    plt.show()
+    plt.savefig('time_plot_test.png')
 
     # plt.show()
 

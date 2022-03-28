@@ -305,7 +305,8 @@ class CollisionAvoidanceEnv(gym.Env):
         agents_still_running = [not done for done in which_agents_done]
 
         # agents_inside_field = self._check_which_agents_inside_field()
-
+        for i in range(len(self.agents)):
+            print("agent "+str(i)+" at goal?", self.agents[i].is_at_goal)
         
         # self.active_agent_mask = self.active_agent_mask & agents_still_running
   

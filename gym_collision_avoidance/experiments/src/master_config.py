@@ -5,17 +5,17 @@ from master_scenario_generator import Scenario_Generator, Seeded_Scenario_Genera
 class Master_Config(object):
     def __init__(self):
         #EvaluateConfig Level
-        self.MAX_NUM_AGENTS_IN_ENVIRONMENT = number_of_agent+1
-        self.EVALUATE_MODE = True
-        self.TRAIN_MODE = False
-        self.DT = 0.1 #0.1
+        self.MAX_NUM_AGENTS_IN_ENVIRONMENT =  2 #number_of_agent+1
+        self.EVALUATE_MODE = False
+        self.TRAIN_MODE = True
+        self.DT = 0.25 #0.1
         self.MAX_TIME_RATIO = 3. #8.
         #Formations config Level
 
         self.SAVE_EPISODE_PLOTS = True
         self.SHOW_EPISODE_PLOTS = False
         self.ANIMATE_EPISODES = True
-        self.NEAR_GOAL_THRESHOLD = 0.2
+        self.NEAR_GOAL_THRESHOLD = 0.25
         #ETH   [[-10, 17], [-6, 16]]
         #HOTEL [[-7,7],[-13,7]]
         #UNIV  [[-3,17],[-3,15]]
@@ -29,13 +29,13 @@ class Master_Config(object):
         self.PLT_LIMITS = [[-15,15],[-15,15]] #[[-10,10],[-10,10]] #[[-15, 15], [-15, 15]]  #display graph grid showing dimension limit
         self.PLT_FIG_SIZE = (10,10) #Actual hidden limit
         self.PLOT_CIRCLES_ALONG_TRAJ = False
-        self.NUM_AGENTS_TO_TEST = [60]
+        self.NUM_AGENTS_TO_TEST = [2]
         #self.POLICIES_TO_TEST = ['GA3C-CADRL-10']
-        self.POLICIES_TO_TEST = ['GA3C-CADRL-10']*60 #['RVO']*number_of_agent#['STGCNN']*number_of_agent #['CADRL']*7#['NAVIGAN']*7#['RVO']*7#['GA3C-CADRL-10']*7
+        self.POLICIES_TO_TEST = ['learning_cadrl', 'learning'] #['RVO']*number_of_agent#['STGCNN']*number_of_agent #['CADRL']*7#['NAVIGAN']*7#['RVO']*7#['GA3C-CADRL-10']*7
         self.NUM_TEST_CASES = 2 #correspond to how many letters are there
 
-        self.MAX_NUM_AGENTS_IN_ENVIRONMENT = number_of_agent+1 
-        self.MAX_NUM_OTHER_AGENTS_OBSERVED = number_of_agent
+        self.MAX_NUM_AGENTS_IN_ENVIRONMENT = 2 #number_of_agent+1 
+        self.MAX_NUM_OTHER_AGENTS_OBSERVED = 1 #number_of_agent
 
         self.agent_time_out    = 200 #180  #30 motion prediction
 

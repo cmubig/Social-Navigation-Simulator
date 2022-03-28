@@ -45,7 +45,7 @@ class Config(object):
         self.SOCIAL_NORMS = "none"
 
         ### SIMULATION
-        self.DT             = 0.2 # seconds between simulation time steps
+        self.DT             = 0.25 # seconds between simulation time steps
         self.NEAR_GOAL_THRESHOLD = 0.3
         self.MAX_TIME_RATIO = 2. # agent has this number times the straight-line-time to reach its goal before "timing out"
         
