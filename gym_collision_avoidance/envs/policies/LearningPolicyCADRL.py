@@ -16,8 +16,9 @@ class LearningPolicyCADRL(LearningPolicy):
     def __init__(self):
         LearningPolicy.__init__(self)
         self.n_eps    =  500            # no. ofs episodes to train for
-        # self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        self.device = "cpu"
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        print("Training on device: ",self.device)
+        # self.device = "cpu"
         # self.external_action = np.zeros(self.possible_actions.num_actions)
         self.step_counter = 0
         self.episode = 0
