@@ -46,8 +46,8 @@ class LearningPolicyCADRL(LearningPolicy):
         self.nA = nA
         self.nS = nS
         # configure policy
-        # self.policy = policy_factory['cadrl']()
-        self.policy = policy_factory['sarl']()
+        self.policy = policy_factory['cadrl']()
+        # self.policy = policy_factory['sarl']()
         if not self.policy.trainable:
             self.parser.error('Policy has to be trainable')
         if args.policy_config is None:
