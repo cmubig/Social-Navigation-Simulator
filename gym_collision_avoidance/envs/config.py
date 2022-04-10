@@ -191,7 +191,36 @@ class Config(object):
                 self.STD_OBS[state] = self.STATE_INFO_DICT[state]['std']
 
 
-class Train(Config):
+class Train_5(Config):
+    def __init__(self):
+        Config.__init__(self)
+        print("::::::::::::Loading TRAIN CONFIG:::::::::::")
+        self.STATES_IN_OBS = ['dist_to_goal','heading_ego_frame','pref_speed','radius','other_agents_states']
+        self.TRAIN_SINGLE_AGENT = True # train only one agent (multi-agent possible)
+        self.MAX_NUM_AGENTS_IN_ENVIRONMENT = 6
+        self.MAX_NUM_AGENTS_TO_SIM = 6
+        self.TEST_CASE_ARGS['num_agents'] = 6
+        self.TEST_CASE_ARGS['policy_to_ensure'] = 'learning_cadrl'
+        self.TEST_CASE_ARGS['policies'] = ['learning_cadrl', 'learning']
+        self.agent_time_out                    = master_config.agent_time_out
+        self.DT                              = master_config.DT
+        self.MAX_TIME_RATIO                  = master_config.MAX_TIME_RATIO
+        self.SAVE_EPISODE_PLOTS                = master_config.SAVE_EPISODE_PLOTS
+        self.SHOW_EPISODE_PLOTS                = master_config.SHOW_EPISODE_PLOTS
+        self.ANIMATE_EPISODES                  = master_config.ANIMATE_EPISODES
+        self.NEAR_GOAL_THRESHOLD               = master_config.NEAR_GOAL_THRESHOLD
+        self.PLT_LIMITS                        = [[-10, 10], [-10, 10]]
+        self.NUM_AGENTS_TO_TEST = [6]
+        #self.POLICIES_TO_TEST = ['GA3C-CADRL-10']
+        self.POLICIES_TO_TEST = ['learning_cadrl', 'learning']
+        self.MAX_NUM_OTHER_AGENTS_OBSERVED     = self.MAX_NUM_AGENTS_IN_ENVIRONMENT - 1
+        self.PLT_FIG_SIZE                      = master_config.PLT_FIG_SIZE
+        self.PLOT_CIRCLES_ALONG_TRAJ           = master_config.PLOT_CIRCLES_ALONG_TRAJ
+        self.NUM_AGENTS_TO_TEST                = master_config.NUM_AGENTS_TO_TEST
+        self.POLICIES_TO_TEST                  = master_config.POLICIES_TO_TEST
+        self.NUM_TEST_CASES                    = master_config.NUM_TEST_CASES
+
+class Train_1(Config):
     def __init__(self):
         Config.__init__(self)
         print("::::::::::::Loading TRAIN CONFIG:::::::::::")
@@ -210,6 +239,10 @@ class Train(Config):
         self.ANIMATE_EPISODES                  = master_config.ANIMATE_EPISODES
         self.NEAR_GOAL_THRESHOLD               = master_config.NEAR_GOAL_THRESHOLD
         self.PLT_LIMITS                        = [[-10, 10], [-10, 10]]
+        self.NUM_AGENTS_TO_TEST = [2]
+        #self.POLICIES_TO_TEST = ['GA3C-CADRL-10']
+        self.POLICIES_TO_TEST = ['learning_cadrl', 'learning']
+        self.MAX_NUM_OTHER_AGENTS_OBSERVED     = self.MAX_NUM_AGENTS_IN_ENVIRONMENT - 1
         self.PLT_FIG_SIZE                      = master_config.PLT_FIG_SIZE
         self.PLOT_CIRCLES_ALONG_TRAJ           = master_config.PLOT_CIRCLES_ALONG_TRAJ
         self.NUM_AGENTS_TO_TEST                = master_config.NUM_AGENTS_TO_TEST

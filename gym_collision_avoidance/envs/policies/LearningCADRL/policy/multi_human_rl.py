@@ -1,7 +1,7 @@
 import torch
 import numpy as np
-from crowd_sim.envs.utils.action import ActionRot, ActionXY
-from crowd_nav.policy.cadrl import CADRL
+from gym_collision_avoidance.envs.policies.LearningCADRL.sim_utils.action import ActionRot, ActionXY
+from gym_collision_avoidance.envs.policies.LearningCADRL.policy.cadrl import CADRL
 
 
 class MultiHumanRL(CADRL):
@@ -35,7 +35,9 @@ class MultiHumanRL(CADRL):
             for action in self.action_space:
                 next_self_state = self.propagate(state.self_state, action)
                 if self.query_env:
-                    next_human_states, reward, done, info = self.env.onestep_lookahead(action)
+                    next_human_states = self.next_step_lookahead[0]
+                    # print("next_human_states: ", next_human_states)
+                    reward = self.predict_reward(next_self_state, next_human_states, action)
                 else:
                     next_human_states = [self.propagate(human_state, ActionXY(human_state.vx, human_state.vy))
                                        for human_state in state.human_states]

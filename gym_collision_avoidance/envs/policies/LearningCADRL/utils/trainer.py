@@ -24,10 +24,13 @@ class Trainer(object):
 
     def optimize_epoch(self, num_epochs):
         if self.optimizer is None:
+            print("optimizer is none")
             raise ValueError('Learning rate is not set!')
         if self.data_loader is None:
+            print("no data")
             self.data_loader = DataLoader(self.memory, self.batch_size, shuffle=True)
         average_epoch_loss = 0
+        print("doing backprop, num_epochs: ", num_epochs)
         for epoch in range(num_epochs):
             epoch_loss = 0
             for data in self.data_loader:
@@ -49,11 +52,15 @@ class Trainer(object):
 
     def optimize_batch(self, num_batches):
         if self.optimizer is None:
+            print("optimizer is none")
             raise ValueError('Learning rate is not set!')
         if self.data_loader is None:
             print(len(self.memory), self.batch_size)
+            print("no data")
             self.data_loader = DataLoader(self.memory, self.batch_size, shuffle=True)
         losses = 0
+        print("doing backprop, num_batches: ", num_batches)
+
         for _ in range(num_batches):
             inputs, values = next(iter(self.data_loader))
             inputs = Variable(inputs)
@@ -68,5 +75,5 @@ class Trainer(object):
 
         average_loss = losses / num_batches
         logging.debug('Average loss : %.2E', average_loss)
-
+        print("avg loss: ", average_loss)
         return average_loss

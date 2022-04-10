@@ -113,6 +113,21 @@ def get_testcase_two_agents(policies=['learning', 'learning']):
         ]
     return agents
 
+def get_testcase_one_train_5(policies=['learning_cadrl', 'learning']):
+    adv_goal_x = 0
+    adv_goal_y = 3
+    learner_goal_x = 1
+    learner_goal_y = 0
+    agents = [
+        Agent(0, 0, learner_goal_x, learner_goal_y, 0.5, 1.0, 0.0, policy_dict[policies[0]], UnicycleDynamics, [OtherAgentsStatesSensor], 0),
+        Agent(3, 3, adv_goal_x, adv_goal_y, 0.5, 1.0, np.pi, policy_dict[policies[1]], UnicycleDynamics, [OtherAgentsStatesSensor], 1),
+        Agent(3, 3, adv_goal_x, adv_goal_y, 0.5, 1.0, np.pi, policy_dict[policies[1]], UnicycleDynamics, [OtherAgentsStatesSensor], 2),
+        Agent(3, 3, adv_goal_x, adv_goal_y, 0.5, 1.0, np.pi, policy_dict[policies[1]], UnicycleDynamics, [OtherAgentsStatesSensor], 3),
+        Agent(3, 3, adv_goal_x, adv_goal_y, 0.5, 1.0, np.pi, policy_dict[policies[1]], UnicycleDynamics, [OtherAgentsStatesSensor], 4),
+        Agent(3, 3, adv_goal_x, adv_goal_y, 0.5, 1.0, np.pi, policy_dict[policies[1]], UnicycleDynamics, [OtherAgentsStatesSensor], 5)
+        ]
+    return agents
+
 def get_testcase_one_train(policies=['learning_cadrl', 'learning']):
     adv_goal_x = 0
     adv_goal_y = 3

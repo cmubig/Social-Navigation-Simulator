@@ -45,7 +45,8 @@ class LearningPolicyCADRL(LearningPolicy):
         self.nA = nA
         self.nS = nS
         # configure policy
-        self.policy = policy_factory['cadrl']()
+        # self.policy = policy_factory['cadrl']()
+        self.policy = policy_factory['sarl']()
         if not self.policy.trainable:
             self.parser.error('Policy has to be trainable')
         if args.policy_config is None:
@@ -97,7 +98,8 @@ class LearningPolicyCADRL(LearningPolicy):
         return action
 
     def update_memory(self, states, action, rewards):
-        self.v_pref = states[0][1]
+        # print("states,", states[0][0])
+        self.v_pref = states[0][0][1]
         print("v_pref: ", self.v_pref)
         if self.memory is None or self.gamma is None:
             raise ValueError('Memory or gamma value is not set!')

@@ -7,7 +7,7 @@ import gym
 import matplotlib.pyplot as plt
 
 gym.logger.set_level(40)
-os.environ['GYM_CONFIG_CLASS'] = 'Train'
+os.environ['GYM_CONFIG_CLASS'] = 'Train_1'
 os.environ["global_timeout"]             = "1000"
 os.environ["global_experiment_number"]   = "1"
 os.environ["global_dataset_name"]        = "custom"
@@ -117,7 +117,7 @@ def run_k_episodes(one_env, num_episodes, phase, agents, update_memory=False, ep
 
             other_agent_state = agents[1].get_next_observable_state(other_action)
             
-            agents[0].policy.update_next_lookahead(other_agent_state)
+            agents[0].policy.update_next_lookahead([other_agent_state])
 
             curr_state = next_state.copy()
     
@@ -252,13 +252,13 @@ def main():
 
     eps_start = 0.5                # exploration probability at start
     eps_end = 0.1                   # exploration probability at end
-    eps_dec = 4000                 # exploration probability decay factor
+    eps_dec = 1000                 # exploration probability decay factor
     eps = eps_start                 # exploration probability
 
     # explorer
 
     agents[0].policy.policy.set_epsilon(0.6)
-    run_k_episodes(one_env, 10, 'train', agents, update_memory=True, episode=0)
+    run_k_episodes(one_env, 1, 'train', agents, update_memory=True, episode=0)
     env.reset()
     episode = 0 
     total_goals = 0
@@ -279,7 +279,8 @@ def main():
             scores.append(score)
         for time in time_to_goal:
             time_to_goal_list.append(time)
-        # print("sample eps: ",agents[0].policy.sample_episodes)
+        print("BACK PROPAGAAAAAAAATTTIIIIOOOONNNNNNNN ! LET'S GOOOOOOOOOOOOOOOOOO!!!")
+
         agents[0].policy.trainer.optimize_batch(agents[0].policy.train_batches)
         env.reset()
         # one_env.reset()
@@ -292,8 +293,8 @@ def main():
             agents[0].policy.update_target_model()
 
         if episode != 0 and episode % agents[0].policy.checkpoint_interval == 0:
-            agents[0].policy.save_checkpoint('trained_checkpoint')
-    agents[0].policy.save_checkpoint('trained_checkpoint')
+            agents[0].policy.save_checkpoint('trained_checkpoint_2')
+    agents[0].policy.save_checkpoint('trained_checkpoint_2')
     plt.figure(figsize=(12,8))
     plt.plot(range(num_episodes), scores)
     plt.xlim(-1, num_episodes+1)
@@ -324,8 +325,10 @@ def main():
     success_rate_list = []
 
     goals, time_to_goal, score_list, colls = run_k_episodes(one_env, 100, 'test', agents, episode=episode)
-    scores.append(i for i in score_list)
-    time_to_goal_list.append(j for j in time_to_goal)
+    for score in score_list:
+        scores.append(score)
+    for time in time_to_goal:
+        time_to_goal_list.append(time)
     success_rate_list.append(100*goals/(num_episodes+1))
     
     plt.figure(figsize=(12,8))

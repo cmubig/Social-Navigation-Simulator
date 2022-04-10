@@ -159,54 +159,6 @@ class CADRL(Policy):
 
         return next_state
 
-    def predict_reward(self, state_agent, state_other, action):
-        collision = False
-        discomfort_dist = state_agent.radius/2
-        dmin = float('inf')
-        # for i, human in enumerate(self.humans):
-        px = state_other.px - state_agent.px
-        py = state_other.py - state_agent.py
-       
-        vx = state_other.vx - action.v * np.cos(action.r + state_agent.theta)
-        vy = state_other.vy - action.v * np.sin(action.r + state_agent.theta)
-        ex = px + vx * self.time_step
-        ey = py + vy * self.time_step
-        # closest distance between boundaries of two agents
-        closest_dist = self.point_to_segment_dist(px, py, ex, ey, 0, 0) - 2*state_agent.radius
-        if closest_dist < 0:
-            collision = True
-
-        elif closest_dist < dmin:
-            dmin = closest_dist
-
-        # # collision detection between humans
-        # human_num = len(self.humans)
-        # for i in range(human_num):
-        #     for j in range(i + 1, human_num):
-        #         dx = self.humans[i].px - self.humans[j].px
-        #         dy = self.humans[i].py - self.humans[j].py
-        #         dist = (dx ** 2 + dy ** 2) ** (1 / 2) - self.humans[i].radius - self.humans[j].radius
-        #         if dist < 0:
-        #             # detect collision but don't take humans' collision into account
-        #             logging.debug('Collision happens between humans in step()')
-
-        # check if reaching the goal
-
-        reaching_goal = np.linalg.norm(np.array(state_agent.px,state_agent.py) - np.array(state_agent.gx,state_agent.gy)) < state_agent.radius/2
-
-        if collision:
-            reward = -0.25
-        elif reaching_goal:
-            reward = 1.0
-        elif dmin < discomfort_dist:
-            # only penalize agent for getting too close if it's visible
-            # adjust the reward based on FPS
-            reward = -0.1
-        else:
-            reward = 0
-
-        return reward
-
     def predict(self, state):
         """
         Input state is the joint state of robot concatenated by the observable state of other agents
@@ -238,11 +190,11 @@ class CADRL(Policy):
             for action in self.action_space:
                 next_self_state = self.propagate(state.self_state, action)
                 ob = self.next_step_lookahead
-                # print(next_self_state, ob[0], "nss")
+                # print("ob: ", ob)
                 reward = self.predict_reward(next_self_state, ob[0], action)
 
                 batch_next_states = torch.cat([torch.Tensor([next_self_state + next_human_state]).to(self.device)
-                                              for next_human_state in ob], dim=0)
+                                              for next_human_state in ob[0]], dim=0)
                 # VALUE UPDATE
                 outputs = self.model(self.rotate(batch_next_states))
                 min_output, min_index = torch.min(outputs, 0)
@@ -264,7 +216,8 @@ class CADRL(Policy):
         :param state:
         :return: tensor of shape (len(state), )
         """
-        assert len(state.human_states) == 1
+        print("len state: ", state.human_states)
+        # assert len(state.human_states) == 1 
         state = torch.Tensor(state.self_state + state.human_states[0]).to(self.device)
         state = self.rotate(state.unsqueeze(0)).squeeze(dim=0)
         return state

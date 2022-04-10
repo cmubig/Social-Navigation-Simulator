@@ -22,6 +22,7 @@ class FullState(object):
         # print("state __str__")
         return ' '.join([str(x) for x in [self.px, self.py, self.vx, self.vy, self.radius, self.gx, self.gy,
                                           self.v_pref, self.theta]])
+        # pass
 
 
 class ObservableState(object):
@@ -40,6 +41,7 @@ class ObservableState(object):
 
     def __str__(self):
         return ' '.join([str(x) for x in [self.px, self.py, self.vx, self.vy, self.radius]])
+        # pass
 
 
 class JointState(object):
