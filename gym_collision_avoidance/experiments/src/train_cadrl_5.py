@@ -279,6 +279,7 @@ def main():
     scores = []
     time_to_goal_list = []
     success_rate_list = []
+    average_loss_list = []
     while episode < agents[0].policy.train_episodes:
         agents[0].policy.policy.set_epsilon(eps)
         # if episode % agents[0].policy.evaluation_interval == 0:
@@ -292,7 +293,7 @@ def main():
         for time in time_to_goal:
             time_to_goal_list.append(time)
         print("BACK PROPAGAAAAAAAATTTIIIIOOOONNNNNNNN ! LET'S GOOOOOOOOOOOOOOOOOO!!!")
-        agents[0].policy.trainer.optimize_batch(agents[0].policy.train_batches)
+        average_loss_list.append(agents[0].policy.trainer.optimize_batch(agents[0].policy.train_batches))
         # env.reset()
         # one_env.reset()
         episode += 1
@@ -304,8 +305,8 @@ def main():
             agents[0].policy.update_target_model()
 
         if episode != 0 and episode % agents[0].policy.checkpoint_interval == 0:
-            agents[0].policy.save_checkpoint('trained_checkpoint')
-    agents[0].policy.save_checkpoint('trained_checkpoint')
+            agents[0].policy.save_checkpoint('trained_checkpoint_cadrl_5_1')
+    agents[0].policy.save_checkpoint('trained_checkpoint_cadrl_5_1')
     plt.figure(figsize=(12,8))
     plt.plot(range(num_episodes), scores)
     plt.xlim(-1, num_episodes+1)
@@ -317,6 +318,16 @@ def main():
     plt.savefig('reward_plot.png')
 
     print("Test: Success Rate and Collisions: ",total_goals, total_colls)
+
+    plt.figure(figsize=(12,8))
+    plt.plot(range(num_episodes), average_loss_list)
+    plt.xlim(-1, num_episodes+1)
+    plt.ylim(0,255)
+    plt.xlabel('Episode')
+    plt.ylabel('Average NN loss')
+    plt.title('Average NN loss vs Episode')
+    plt.show()
+    plt.savefig('avg_nn_loss.png')
 
     plt.figure(figsize=(12,8))
     plt.plot(range(num_episodes), time_to_goal_list)
