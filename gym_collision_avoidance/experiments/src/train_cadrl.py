@@ -135,8 +135,8 @@ def run_k_episodes(one_env, num_episodes, phase, agents, update_memory=False, ep
             # Run a simulation step (check for collisions, move sim agents)
             obs, rewards, game_over, which_agents_done = one_env.step(actions)
             # print("obs", obs)
-            if agents[0].is_at_goal:
-                rewards-= (i-dist2goal/agents[0].pref_speed)/num_steps
+            # if agents[0].is_at_goal:
+                # rewards-= (i-dist2goal/agents[0].pref_speed)/num_steps
             states.append(agents[0].policy.policy.last_state)
             acts.append(rl_action)
             rews.append(rewards)
@@ -252,7 +252,7 @@ def main():
 
     eps_start = 0.5                # exploration probability at start
     eps_end = 0.1                   # exploration probability at end
-    eps_dec = 1000                 # exploration probability decay factor
+    eps_dec = 4000                 # exploration probability decay factor
     eps = eps_start                 # exploration probability
 
     # explorer

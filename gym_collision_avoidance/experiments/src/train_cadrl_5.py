@@ -144,8 +144,8 @@ def run_k_episodes(one_env, num_episodes, phase, agents, update_memory=False, ep
             # Run a simulation step (check for collisions, move sim agents)
             obs, rewards, game_over, which_agents_done = one_env.step(actions)
             # print("obs", obs)
-            if agents[0].is_at_goal:
-                rewards-= (i-dist2goal/agents[0].pref_speed)/num_steps
+            # if agents[0].is_at_goal:
+                # rewards-= (i-dist2goal/agents[0].pref_speed)/num_steps
             states.append(agents[0].policy.policy.last_state)
             # acts.append(rl_action)
             acts.append(actions[0])
