@@ -46,7 +46,7 @@ class LearningPolicyCADRL(LearningPolicy):
         self.nA = nA
         self.nS = nS
         # configure policy
-        self.policy_name = 'sarl'
+        self.policy_name = 'cadrl'
         self.policy = policy_factory[self.policy_name]()
         # self.policy = policy_factory['sarl']()
         if not self.policy.trainable:

@@ -3,6 +3,7 @@ import os
 from turtle import setworldcoordinates
 import numpy as np
 import gym
+from collections import deque
 # import cv2
 import matplotlib.pyplot as plt
 
@@ -280,6 +281,9 @@ def main():
     time_to_goal_list = []
     success_rate_list = []
     average_loss_list = []
+    score_dq = deque(maxlen=100)
+    time_dq = deque(maxlen=100)
+    avg_loss_dq = deque(maxlen=100)
     while episode < agents[0].policy.train_episodes:
         agents[0].policy.policy.set_epsilon(eps)
         # if episode % agents[0].policy.evaluation_interval == 0:
@@ -289,12 +293,15 @@ def main():
         total_colls+=colls
         num_episodes+=agents[0].policy.sample_episodes
         for score in score_list:
-            scores.append(score)
+            score_dq.append(score)
+        scores.append(np.mean(score_dq))
         for time in time_to_goal:
-            time_to_goal_list.append(time)
+            time_dq.append(time)
+        time_to_goal_list.append(np.mean(time_dq))
         print("BACK PROPAGAAAAAAAATTTIIIIOOOONNNNNNNN ! LET'S GOOOOOOOOOOOOOOOOOO!!!")
         avg_loss = agents[0].policy.trainer.optimize_batch(agents[0].policy.train_batches)
-        average_loss_list.append(avg_loss)
+        avg_loss_dq.append(avg_loss)
+        average_loss_list.append(np.mean(avg_loss_dq))
 
         # env.reset()
         # one_env.reset()
@@ -307,8 +314,8 @@ def main():
             agents[0].policy.update_target_model()
 
         if episode != 0 and episode % agents[0].policy.checkpoint_interval == 0:
-            agents[0].policy.save_checkpoint('trained_checkpoint_sarl_5_1')
-    agents[0].policy.save_checkpoint('trained_checkpoint_sarl_5_1')
+            agents[0].policy.save_checkpoint('trained_checkpoint_cadrl_5_2')
+    agents[0].policy.save_checkpoint('trained_checkpoint_cadrl_5_2')
     plt.figure(figsize=(12,8))
     plt.plot(range(num_episodes), scores)
     plt.xlim(-1, num_episodes+1)
@@ -353,7 +360,6 @@ def main():
         scores.append(score)
     for time in time_to_goal:
         time_to_goal_list.append(time)
-    success_rate_list.append(100*goals/(num_episodes+1))
     
     plt.figure(figsize=(12,8))
     plt.plot(range(num_episodes), scores)
@@ -361,20 +367,20 @@ def main():
     plt.ylim(-2,3)
     plt.xlabel('Episode')
     plt.ylabel('Cumulative Reward')
-    plt.title('Test: Cumulative Reward vs Episode')
-    plt.savefig('reward_plot_test.png')
+    plt.title('Cumulative Reward vs Episode')
     plt.show()
-    print("Test: Success Rate and Collisions: ",total_goals, total_colls)
+    plt.savefig('reward_plot.png')
 
+    print("Test: Success Rate and Collisions: ",goals, colls)
     plt.figure(figsize=(12,8))
     plt.plot(range(num_episodes), time_to_goal_list)
     plt.xlim(-1, num_episodes+1)
-    plt.ylim(0,255)
+    plt.ylim(0,1.1*max(time_to_goal_list))
     plt.xlabel('Episode')
     plt.ylabel('Time to goal')
-    plt.title('Test: Time to goal vs Episode')
+    plt.title('Time to goal vs Episode')
     plt.show()
-    plt.savefig('time_plot_test.png')
+    plt.savefig('time_to_goal.png')
 
     # plt.show()
 

@@ -54,7 +54,7 @@ class Policy(object):
             ex = px + vx * self.time_step
             ey = py + vy * self.time_step
             # closest distance between boundaries of two agents
-            closest_dist = self.point_to_segment_dist(px, py, ex, ey, 0, 0) - state_agent.radius
+            closest_dist = self.point_to_segment_dist(px, py, ex, ey, 0, 0) - state_agent.radius - state_other.radius
             if closest_dist < 0:
                 collision = True
                 break
@@ -63,16 +63,16 @@ class Policy(object):
                 dmin = closest_dist
 
 
-        reaching_goal = np.linalg.norm(np.array(state_agent.px,state_agent.py) - np.array(state_agent.gx,state_agent.gy)) < state_agent.radius/2
+        reaching_goal = np.linalg.norm(np.array(state_agent.px,state_agent.py) - np.array(state_agent.gx,state_agent.gy)) < 0.3
 
         if collision:
             reward = -0.25
         elif reaching_goal:
             reward = 1.0
-        elif dmin < discomfort_dist:
-            # only penalize agent for getting too close if it's visible
-            # adjust the reward based on FPS
-            reward = -0.1
+        # elif dmin < discomfort_dist:
+        #     # only penalize agent for getting too close if it's visible
+        #     # adjust the reward based on FPS
+        #     reward = -0.1
         else:
             reward = 0
         

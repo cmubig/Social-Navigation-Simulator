@@ -35,7 +35,7 @@ class Config(object):
         self.REWARD_COLLISION_WITH_WALL = -0.25 # reward given when agent collides with wall
         self.REWARD_GETTING_CLOSE   = -0.1 # reward when agent gets close to another agent (unused?)
         self.REWARD_ENTERED_NORM_ZONE   = -0.05 # reward when agent enters another agent's social zone
-        self.REWARD_TIME_STEP   = -0.005 # default reward given if none of the others apply (encourage speed)
+        self.REWARD_TIME_STEP   = 0.0 # default reward given if none of the others apply (encourage speed)
         self.REWARD_WIGGLY_BEHAVIOR = 0.0
         self.WIGGLY_BEHAVIOR_THRESHOLD = np.inf
         self.COLLISION_DIST = 0.0 # meters between agents' boundaries for collision
