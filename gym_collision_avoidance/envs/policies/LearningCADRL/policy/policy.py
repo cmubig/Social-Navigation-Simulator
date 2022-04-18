@@ -54,7 +54,7 @@ class Policy(object):
             ex = px + vx * self.time_step
             ey = py + vy * self.time_step
             # closest distance between boundaries of two agents
-            closest_dist = self.point_to_segment_dist(px, py, ex, ey, 0, 0) - state_agent.radius - state_other.radius
+            closest_dist = self.point_to_segment_dist(px, py, ex, ey, 0, 0) - 2*state_agent.radius
             if closest_dist < 0:
                 collision = True
                 break
