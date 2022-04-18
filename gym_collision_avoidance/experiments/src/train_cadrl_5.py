@@ -264,13 +264,13 @@ def main():
 
     eps_start = 0.5                # exploration probability at start
     eps_end = 0.1                   # exploration probability at end
-    eps_dec = 1000                 # exploration probability decay factor
+    eps_dec = 4000                 # exploration probability decay factor
     eps = eps_start                 # exploration probability
 
     # explorer
 
     agents[0].policy.policy.set_epsilon(0.6)
-    run_k_episodes(one_env, 2, 'train', agents, update_memory=True, episode=0)
+    run_k_episodes(one_env, 10, 'train', agents, update_memory=True, episode=0)
     # env.reset()
     episode = 0 
     total_goals = 0
@@ -293,7 +293,9 @@ def main():
         for time in time_to_goal:
             time_to_goal_list.append(time)
         print("BACK PROPAGAAAAAAAATTTIIIIOOOONNNNNNNN ! LET'S GOOOOOOOOOOOOOOOOOO!!!")
-        average_loss_list.append(agents[0].policy.trainer.optimize_batch(agents[0].policy.train_batches))
+        avg_loss = agents[0].policy.trainer.optimize_batch(agents[0].policy.train_batches)
+        average_loss_list.append(avg_loss)
+
         # env.reset()
         # one_env.reset()
         episode += 1
@@ -305,8 +307,8 @@ def main():
             agents[0].policy.update_target_model()
 
         if episode != 0 and episode % agents[0].policy.checkpoint_interval == 0:
-            agents[0].policy.save_checkpoint('trained_checkpoint_cadrl_5_1')
-    agents[0].policy.save_checkpoint('trained_checkpoint_cadrl_5_1')
+            agents[0].policy.save_checkpoint('trained_checkpoint_sarl_5_1')
+    agents[0].policy.save_checkpoint('trained_checkpoint_sarl_5_1')
     plt.figure(figsize=(12,8))
     plt.plot(range(num_episodes), scores)
     plt.xlim(-1, num_episodes+1)
@@ -322,7 +324,7 @@ def main():
     plt.figure(figsize=(12,8))
     plt.plot(range(num_episodes), average_loss_list)
     plt.xlim(-1, num_episodes+1)
-    plt.ylim(0,255)
+    plt.ylim(0,1.1*max(average_loss_list))
     plt.xlabel('Episode')
     plt.ylabel('Average NN loss')
     plt.title('Average NN loss vs Episode')
@@ -332,7 +334,7 @@ def main():
     plt.figure(figsize=(12,8))
     plt.plot(range(num_episodes), time_to_goal_list)
     plt.xlim(-1, num_episodes+1)
-    plt.ylim(0,255)
+    plt.ylim(0,1.1*max(time_to_goal_list))
     plt.xlabel('Episode')
     plt.ylabel('Time to goal')
     plt.title('Time to goal vs Episode')
