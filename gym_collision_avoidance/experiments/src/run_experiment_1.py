@@ -48,8 +48,10 @@ from gym_collision_avoidance.experiments.src.master_config_deploy import Scenari
 ##master_config   = Master_Config(    timeout  )
 ##scenario_config = Scenario_Config(  experiment_number, algorithm_name, experiment_iteration_num, dataset_name=None, population_density=None)
 
+#master config and scenario config from "master_config_deploy.py"
 master_config   = Master_Config()
 
+# scenario config for algorith, exp no etc
 scenario_config = Scenario_Config(  experiment_number, algorithm_name, experiment_iteration_num, dataset_name, population_density)
 
 
@@ -74,6 +76,8 @@ motion_list = [ "CVM" , "SLSTM" , "SOCIALGAN" , "STGCNN", "SPEC" ]
 navigation_list = [ "LINEAR" , "SOCIALFORCE" , "RVO" , "CADRL" ,"NAVIGAN" ]
 
 ###########################Dataset output##################################
+
+# visual trajectories add to the plot
 def add_traj(agents, trajs, dt, traj_i, max_ts):
     agent_i = 0
     other_agent_i = (agent_i + 1) % 2
@@ -142,6 +146,7 @@ def reset_env(env, one_env, test_case_fn, test_case_args, test_case,test_case_in
         policy = agent_policies_list[i]
         agent  = prev_agents[i]
         
+
         if 'checkpt_name' in policies[policy]:
             agent.policy.env = env
             agent.policy.initialize_network(**policies[policy])
@@ -164,8 +169,8 @@ def reset_env(env, one_env, test_case_fn, test_case_args, test_case,test_case_in
 
 def main():
     
-
-    test_case_fn = tc.custom_formation #formation
+    # initialize custom testcase
+    test_case_fn = tc.custom_formation #formation (agents, test_case, test_case_index, num_agents)
     test_case_args = {}
     
 
@@ -219,6 +224,8 @@ def main():
         #print(test_case_index)
         #print([test_case_index])
         #print(list(scenario_config.scenario)[test_case_index])
+
+
         agent_policies_list = np.array(list(scenario_config.scenario)[test_case_index])[:,1] #this scenario's policies list
         num_agents = len(agent_policies_list)
         print("num_agents")
@@ -237,8 +244,8 @@ def main():
         one_env.plot_policy_name = str(np.unique(agent_policies_list)[0]) #perhaps it is just the name?
         print("before episode")
         episode_stats, prev_agents, presence_dict = run_episode(env, one_env)
-        print("after episode")
-        #print(episode_stats)
+        print("after episode, episode stats: ")
+        # print(episode_stats)
         #episode_stats returned something like this
         '''
 {'total_reward': array([  1.   ,   0.618,  -3.722,   1.   ,   0.813,  -1.878, -11.319,

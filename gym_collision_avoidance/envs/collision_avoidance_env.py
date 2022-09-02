@@ -35,10 +35,12 @@ from gym_collision_avoidance.envs.policies.ExternalPolicy import ExternalPolicy
 from gym_collision_avoidance.envs.policies.LearningPolicy import LearningPolicy
 from gym_collision_avoidance.envs.policies.CARRLPolicy import CARRLPolicy
 from gym_collision_avoidance.envs.policies.LearningPolicyGA3C import LearningPolicyGA3C
+from gym_collision_avoidance.envs.policies.LearningPolicyDQN import LearningPolicyDQN
+
 
 from gym_collision_avoidance.envs.policies.NAVIGANPolicy import NAVIGANPolicy
 from gym_collision_avoidance.envs.policies.STGCNNPolicy import STGCNNPolicy
-from gym_collision_avoidance.envs.policies.SPECPolicy import SPECPolicy
+# from gym_collision_avoidance.envs.policies.SPECPolicy import SPECPolicy
 from gym_collision_avoidance.envs.policies.SOCIALFORCEPolicy import SOCIALFORCEPolicy
 from gym_collision_avoidance.envs.policies.SLSTMPolicy import SLSTMPolicy
 from gym_collision_avoidance.envs.policies.SOCIALGANPolicy import SOCIALGANPolicy
@@ -66,11 +68,12 @@ policy_dict = {
     'GA3C_CADRL': GA3CCADRLPolicy,
     'learning': LearningPolicy,
     'learning_ga3c': LearningPolicyGA3C,
+    'learning_dqn': LearningPolicyDQN,
     'static': StaticPolicy,
     'CADRL': CADRLPolicy,
     'NAVIGAN' : NAVIGANPolicy,
     'STGCNN' : STGCNNPolicy,
-    'SPEC' : SPECPolicy,
+    # 'SPEC' : SPECPolicy,
     'SOCIALFORCE' : SOCIALFORCEPolicy,
     'SLSTM' : SLSTMPolicy,
     'SOCIALGAN' : SOCIALGANPolicy,
@@ -200,7 +203,8 @@ class CollisionAvoidanceEnv(gym.Env):
         self.active_agents_per_timestep = dict()
 
         self.replaced_agent_mask = None # agent that arrived will be removed and replace by a new agent
-        
+
+
     def step(self, actions, dt=None):
         """ Run one timestep of environment dynamics.
 
@@ -301,9 +305,10 @@ class CollisionAvoidanceEnv(gym.Env):
         agents_still_running = [not done for done in which_agents_done]
 
         # agents_inside_field = self._check_which_agents_inside_field()
-
+        for i in range(len(self.agents)):
+            print("agent "+str(i)+" at goal?", self.agents[i].is_at_goal)
         
-        self.active_agent_mask = self.active_agent_mask & agents_still_running
+        # self.active_agent_mask = self.active_agent_mask & agents_still_running
   
         #add agents here
         #take in-active agents and re-add them as new agents with timestamp of now. 
@@ -317,8 +322,8 @@ class CollisionAvoidanceEnv(gym.Env):
 
                 #agent arrived the goal or agent ran outside the field,    then, if there is enough time for newly added agent to reach goal in a straight line:
                 if (agent.is_at_goal or agent.is_out_of_bounds) and (Config.agent_time_out - self.dt_nominal*self.episode_step_number > agent.straight_line_time_to_reach_goal):
-                    agent_policy     = "LINEAR" if agent.policy.str == "NonCooperativePolicy" else agent.policy.str
-                    
+                    agent_policy     = "LINEAR" if agent.policy.str == "NonCooperativePolicy" else agent.policy.str                        
+
                     agent_radius     = agent.radius
                     agent_pref_speed = agent.pref_speed
 
@@ -340,71 +345,72 @@ class CollisionAvoidanceEnv(gym.Env):
                     global_population_density = float(os.environ["global_population_density"])
 
                     respawn_scenario = None
-                    #if is experiment 1, then respawn with real start&goal from dataset, will also override
-                    if global_experiment_number ==1:
-                        respawn_scenario = real_dataset_traj( dataset_name=global_dataset_name ).pick_one( list(compress(self.agents, temp_active_agent_mask)) ,random_seed=self.episode_step_number+i*500)
+                    if(respawn_scenario is not None):
+                        #if is experiment 1, then respawn with real start&goal from dataset, will also override
+                        if global_experiment_number ==1:
+                            respawn_scenario = real_dataset_traj( dataset_name=global_dataset_name ).pick_one( list(compress(self.agents, temp_active_agent_mask)) ,random_seed=self.episode_step_number+i*500)
 
-                    else:
-                        respawn_scenario = Single_Seeded_Population_Scenario_Generator( 0 , agent_policy, x_min,x_max, y_min, y_max,
-                                                                                        agent_pref_speed, agent_radius, 0, list(compress(self.agents, temp_active_agent_mask)), random_seed=self.episode_step_number+i*500, num_agents_override=1 ).population_random_square_edge() 
-
-
-
-                    #print("RESPAWN"*15)
-                    #print(respawn_scenario)
-                    agent_policy     = "LINEAR" if agent.policy.str == "NonCooperativePolicy" else agent.policy.str
-
-                    _,_, start_x, start_y, goal_x, goal_y, past_traj,_,_ = respawn_scenario
-                    agent_start      = np.array( [ start_x, start_y ] )
-                    agent_goal       = np.array( [ goal_x, goal_y ] )
-                    
-                    #agent_goal      = agent.start_global_frame
-                    #agent_start     = agent.goal_global_frame
-
-                    agent_vec_to_goal = agent_goal - agent_start
-                    agent_heading     = np.arctan2(agent_vec_to_goal[1], agent_vec_to_goal[0])
-
-                    agent_px , agent_py  = agent_start
-                    agent_gx , agent_gy  = agent_goal
-
-                    agent_dynamics_model = agent.dynamics_model
-                    agent_sensors        = agent.sensors
+                        else:
+                            respawn_scenario = Single_Seeded_Population_Scenario_Generator( 0 , agent_policy, x_min,x_max, y_min, y_max,
+                                                                                            agent_pref_speed, agent_radius, 0, list(compress(self.agents, temp_active_agent_mask)), random_seed=self.episode_step_number+i*500, num_agents_override=1 ).population_random_square_edge() 
 
 
 
-                    number_of_agents  =  len(self.agents)+1
-                    algorithm_name    =  agent_policy
+                        #print("RESPAWN"*15)
+                        #print(respawn_scenario)
+                        agent_policy     = "LINEAR" if agent.policy.str == "NonCooperativePolicy" else agent.policy.str
 
-##                    self.scenario=[]
-##                    if global_experiment_number == 1: #Simulate algorithm using settings from datasets! (e.g. ETH) 
-##                        
-##                        for i in range(experiment_iteration_num): #set radius from 0.2 to 0.05 to show slstm do better in low radius situation
-##                            self.scenario.append( Seeded_Scenario_Generator( self.exp_setting[0], algorithm_name, self.exp_setting[4],self.exp_setting[5], self.exp_setting[6], self.exp_setting[7] , self.exp_setting[2],
-##                                                                             0.2 , 0, num_agents_stddev=self.exp_setting[1], pref_speed_stddev=self.exp_setting[3], random_seed=i , num_agents_override=number_of_agents ).random_square_edge() )
-##
-##                    elif global_experiment_number in [2,3,4]: #population density evaluation
-##
-##                        for i in range(experiment_iteration_num):         
-##                            self.scenario.append( Seeded_Population_Scenario_Generator( global_population_density, algorithm_name, self.exp_setting[4],self.exp_setting[5], self.exp_setting[6], self.exp_setting[7], self.exp_setting[2],
-##                                                                                        0.2, 0, random_seed=i , num_agents_override=number_of_agents ).population_random_square_edge() )
-
-                    new_agent = Agent( agent_px, agent_py, agent_gx, agent_gy, agent_radius, agent_pref_speed, agent_heading, policy_dict[agent_policy], UnicycleDynamics, [OtherAgentsStatesSensor], (number_of_agents-1) )
-                    new_agent.reset( px=agent_px, py=agent_py, gx=agent_gx, gy=agent_gy, pref_speed=agent_pref_speed, radius=agent_radius, heading=agent_heading,
-                                     start_step_num= self.episode_step_number ,start_t= self.episode_step_number*self.dt_nominal)
-
-                    if global_experiment_number ==1:  new_agent.past_traj = past_traj
+                        _,_, start_x, start_y, goal_x, goal_y, past_traj,_,_ = respawn_scenario
+                        agent_start      = np.array( [ start_x, start_y ] )
+                        agent_goal       = np.array( [ goal_x, goal_y ] )
                         
-                    self.agents.append( new_agent )
+                        #agent_goal      = agent.start_global_frame
+                        #agent_start     = agent.goal_global_frame
 
-                    # since original agent's already handled by "&" case, no need to update agent's state from active to false,
-                    # add the replaced agent as a new agent, add it to active agent mask list
-                    self.active_agent_mask = np.append(self.active_agent_mask  , [True] )
+                        agent_vec_to_goal = agent_goal - agent_start
+                        agent_heading     = np.arctan2(agent_vec_to_goal[1], agent_vec_to_goal[0])
 
-                    #since this agent is replaced, update to true
-                    self.replaced_agent_mask[i] = True
-                     
-                    #add the replaced agent as a new agnet, add it to "not yet" replaced agent mask list (since it is new)
-                    self.replaced_agent_mask = np.append(self.replaced_agent_mask, [False] )
+                        agent_px , agent_py  = agent_start
+                        agent_gx , agent_gy  = agent_goal
+
+                        agent_dynamics_model = agent.dynamics_model
+                        agent_sensors        = agent.sensors
+
+
+
+                        number_of_agents  =  len(self.agents)+1
+                        algorithm_name    =  agent_policy
+
+    ##                    self.scenario=[]
+    ##                    if global_experiment_number == 1: #Simulate algorithm using settings from datasets! (e.g. ETH) 
+    ##                        
+    ##                        for i in range(experiment_iteration_num): #set radius from 0.2 to 0.05 to show slstm do better in low radius situation
+    ##                            self.scenario.append( Seeded_Scenario_Generator( self.exp_setting[0], algorithm_name, self.exp_setting[4],self.exp_setting[5], self.exp_setting[6], self.exp_setting[7] , self.exp_setting[2],
+    ##                                                                             0.2 , 0, num_agents_stddev=self.exp_setting[1], pref_speed_stddev=self.exp_setting[3], random_seed=i , num_agents_override=number_of_agents ).random_square_edge() )
+    ##
+    ##                    elif global_experiment_number in [2,3,4]: #population density evaluation
+    ##
+    ##                        for i in range(experiment_iteration_num):         
+    ##                            self.scenario.append( Seeded_Population_Scenario_Generator( global_population_density, algorithm_name, self.exp_setting[4],self.exp_setting[5], self.exp_setting[6], self.exp_setting[7], self.exp_setting[2],
+    ##                                                                                        0.2, 0, random_seed=i , num_agents_override=number_of_agents ).population_random_square_edge() )
+
+                        new_agent = Agent( agent_px, agent_py, agent_gx, agent_gy, agent_radius, agent_pref_speed, agent_heading, policy_dict[agent_policy], UnicycleDynamics, [OtherAgentsStatesSensor], (number_of_agents-1) )
+                        new_agent.reset( px=agent_px, py=agent_py, gx=agent_gx, gy=agent_gy, pref_speed=agent_pref_speed, radius=agent_radius, heading=agent_heading,
+                                        start_step_num= self.episode_step_number ,start_t= self.episode_step_number*self.dt_nominal)
+
+                        if global_experiment_number ==1:  new_agent.past_traj = past_traj
+                            
+                        self.agents.append( new_agent )
+
+                        # since original agent's already handled by "&" case, no need to update agent's state from active to false,
+                        # add the replaced agent as a new agent, add it to active agent mask list
+                        self.active_agent_mask = np.append(self.active_agent_mask  , [True] )
+
+                        #since this agent is replaced, update to true
+                        self.replaced_agent_mask[i] = True
+                        
+                        #add the replaced agent as a new agnet, add it to "not yet" replaced agent mask list (since it is new)
+                        self.replaced_agent_mask = np.append(self.replaced_agent_mask, [False] )
             
 
         
@@ -415,72 +421,71 @@ class CollisionAvoidanceEnv(gym.Env):
                 'which_agents_learning': which_agents_learning_dict,
             }
 
-    '''  ####Original step####
-    def step(self, actions, dt=None):
-        """ Run one timestep of environment dynamics.
+      ####Original step####
+    # def step(self, actions, dt=None):
+    #     """ Run one timestep of environment dynamics.
 
-        This is the main function. An external process will compute an action for every agent
-        then call env.step(actions). The agents take those actions,
-        then we check if any agents have earned a reward (collision/goal/...).
-        Then agents take an observation of the new world state. We compute whether each agent is done
-        (collided/reached goal/ran out of time) and if everyone's done, the episode ends.
-        We return the relevant info back to the process that called env.step(actions).
+    #     This is the main function. An external process will compute an action for every agent
+    #     then call env.step(actions). The agents take those actions,
+    #     then we check if any agents have earned a reward (collision/goal/...).
+    #     Then agents take an observation of the new world state. We compute whether each agent is done
+    #     (collided/reached goal/ran out of time) and if everyone's done, the episode ends.
+    #     We return the relevant info back to the process that called env.step(actions).
 
-        Args:
-            actions (list): list of [delta heading angle, speed] commands (1 per agent in env)
-            dt (float): time in seconds to run the simulation (defaults to :code:`self.dt_nominal`)
+    #     Args:
+    #         actions (list): list of [delta heading angle, speed] commands (1 per agent in env)
+    #         dt (float): time in seconds to run the simulation (defaults to :code:`self.dt_nominal`)
 
-        Returns:
-        4-element tuple containing
+    #     Returns:
+    #     4-element tuple containing
 
-        - **next_observations** (*np array*): (obs_length x num_agents) with each agent's observation
-        - **rewards** (*list*): 1 scalar reward per agent in self.agents
-        - **game_over** (*bool*): true if every agent is done
-        - **info_dict** (*dict*): metadata that helps in training
+    #     - **next_observations** (*np array*): (obs_length x num_agents) with each agent's observation
+    #     - **rewards** (*list*): 1 scalar reward per agent in self.agents
+    #     - **game_over** (*bool*): true if every agent is done
+    #     - **info_dict** (*dict*): metadata that helps in training
 
-        """
+    #     """
         
-        if dt is None:
-            dt = self.dt_nominal
+    #     if dt is None:
+    #         dt = self.dt_nominal
 
-        self.episode_step_number += 1
+    #     self.episode_step_number += 1
 
-        # Take action
-        self._take_action(actions, dt)
+    #     # Take action
+    #     self._take_action(actions, dt)
 
-        # Collect rewards
-        rewards = self._compute_rewards()
+    #     # Collect rewards
+    #     rewards = self._compute_rewards()
 
-        # Take observation
-        next_observations = self._get_obs()
+    #     # Take observation
+    #     next_observations = self._get_obs()
 
-        if Config.ANIMATE_EPISODES and self.episode_step_number % self.animation_period_steps == 0:
-            plot_episode(self.agents, False, self.map, self.test_case_index,
-                circles_along_traj=Config.PLOT_CIRCLES_ALONG_TRAJ,
-                plot_save_dir=self.plot_save_dir,
-                plot_policy_name=self.plot_policy_name,
-                save_for_animation=True,
-                limits=self.plt_limits,
-                fig_size=self.plt_fig_size,
-                perturbed_obs=self.perturbed_obs,
-                show=False,
-                save=True)
+    #     if Config.ANIMATE_EPISODES and self.episode_step_number % self.animation_period_steps == 0:
+    #         plot_episode(self.agents, False, self.map, self.test_case_index,
+    #             circles_along_traj=Config.PLOT_CIRCLES_ALONG_TRAJ,
+    #             plot_save_dir=self.plot_save_dir,
+    #             plot_policy_name=self.plot_policy_name,
+    #             save_for_animation=True,
+    #             limits=self.plt_limits,
+    #             fig_size=self.plt_fig_size,
+    #             perturbed_obs=self.perturbed_obs,
+    #             show=False,
+    #             save=True)
 
-        # Check which agents' games are finished (at goal/collided/out of time)
-        which_agents_done, game_over = self._check_which_agents_done()
+    #     # Check which agents' games are finished (at goal/collided/out of time)
+    #     which_agents_done, game_over = self._check_which_agents_done()
 
-        which_agents_done_dict = {}
-        which_agents_learning_dict = {}
-        for i, agent in enumerate(self.agents):
-            which_agents_done_dict[agent.id] = which_agents_done[i]
-            which_agents_learning_dict[agent.id] = agent.policy.is_still_learning
+    #     which_agents_done_dict = {}
+    #     which_agents_learning_dict = {}
+    #     for i, agent in enumerate(self.agents):
+    #         which_agents_done_dict[agent.id] = which_agents_done[i]
+    #         which_agents_learning_dict[agent.id] = agent.policy.is_still_learning
 
-        return next_observations, rewards, game_over, \
-            {
-                'which_agents_done': which_agents_done_dict,
-                'which_agents_learning': which_agents_learning_dict,
-            }
-    '''
+    #     return next_observations, rewards, game_over, \
+    #         {
+    #             'which_agents_done': which_agents_done_dict,
+    #             'which_agents_learning': which_agents_learning_dict,
+    #         }
 
     def reset(self):
         """ Resets the environment, re-initializes agents, plots episode (if applicable) and returns an initial observation.
@@ -535,7 +540,7 @@ class CollisionAvoidanceEnv(gym.Env):
             elif agent.policy.is_external:
                 all_actions[agent_index, :] = agent.policy.external_action_to_action(agent, actions[agent_index])
             else:
-                dict_obs = None #self.observation[agent_index]
+                dict_obs = self.observation[agent_index] # None
                 action_args = inspect.getfullargspec(agent.policy.find_next_action)[0]
                 if 'full_agent_list' in action_args and 'active_agent_mask' in action_args:
                     all_actions[agent_index, :] = agent.policy.find_next_action(dict_obs, self.agents, agent_index,  full_agent_list = self.agents, active_agent_mask = self.active_agent_mask)
@@ -546,44 +551,43 @@ class CollisionAvoidanceEnv(gym.Env):
             agent.take_action(all_actions[i,:], dt)
 
 
-    '''   #####Original#########
-    def _take_action(self, actions, dt):
-        """ Some agents' actions come externally through the actions arg, agents with internal policies query their policy here, 
-        then each agent takes a step simultaneously.
+    #####Original#########
+    # def _take_action(self, actions, dt):
+    #     """ Some agents' actions come externally through the actions arg, agents with internal policies query their policy here, 
+    #     then each agent takes a step simultaneously.
 
-        This makes it so an external script that steps through the environment doesn't need to
-        be aware of internals of the environment, like ensuring RVO agents compute their RVO actions.
-        Instead, all policies that are already trained/frozen are computed internally, and if an
-        agent's policy is still being trained, it's convenient to isolate the training code from the environment this way.
-        Or, if there's a real robot with its own planner on-board (thus, the agent should have an ExternalPolicy), 
-        we don't bother computing its next action here and just take what the actions dict said.
+    #     This makes it so an external script that steps through the environment doesn't need to
+    #     be aware of internals of the environment, like ensuring RVO agents compute their RVO actions.
+    #     Instead, all policies that are already trained/frozen are computed internally, and if an
+    #     agent's policy is still being trained, it's convenient to isolate the training code from the environment this way.
+    #     Or, if there's a real robot with its own planner on-board (thus, the agent should have an ExternalPolicy), 
+    #     we don't bother computing its next action here and just take what the actions dict said.
 
-        Args:
-            actions (dict): keyed by agent indices, each value has a [delta heading angle, speed] command.
-                Agents with an ExternalPolicy sub-class receive their actions through this dict.
-                Other agents' indices shouldn't appear in this dict, but will be ignored if so, because they have 
-                an InternalPolicy sub-class, meaning they can
-                compute their actions internally given their observation (e.g., already trained CADRL, RVO, Non-Cooperative, etc.)
-            dt (float): time in seconds to run the simulation (defaults to :code:`self.dt_nominal`)
+    #     Args:
+    #         actions (dict): keyed by agent indices, each value has a [delta heading angle, speed] command.
+    #             Agents with an ExternalPolicy sub-class receive their actions through this dict.
+    #             Other agents' indices shouldn't appear in this dict, but will be ignored if so, because they have 
+    #             an InternalPolicy sub-class, meaning they can
+    #             compute their actions internally given their observation (e.g., already trained CADRL, RVO, Non-Cooperative, etc.)
+    #         dt (float): time in seconds to run the simulation (defaults to :code:`self.dt_nominal`)
 
-        """
-        num_actions_per_agent = 2  # speed, delta heading angle
-        all_actions = np.zeros((len(self.agents), num_actions_per_agent), dtype=np.float32)
+    #     """
+    #     num_actions_per_agent = 2  # speed, delta heading angle
+    #     all_actions = np.zeros((len(self.agents), num_actions_per_agent), dtype=np.float32)
 
-        # Agents set their action (either from external or w/ find_next_action)
-        for agent_index, agent in enumerate(self.agents):
-            if agent.is_done:
-                continue
-            elif agent.policy.is_external:
-                all_actions[agent_index, :] = agent.policy.external_action_to_action(agent, actions[agent_index])
-            else:
-                dict_obs = self.observation[agent_index]
-                all_actions[agent_index, :] = agent.policy.find_next_action(dict_obs, self.agents, agent_index)
+    #     # Agents set their action (either from external or w/ find_next_action)
+    #     for agent_index, agent in enumerate(self.agents):
+    #         if agent.is_done:
+    #             continue
+    #         elif agent.policy.is_external:
+    #             all_actions[agent_index, :] = agent.policy.external_action_to_action(agent, actions[agent_index])
+    #         else:
+    #             dict_obs = self.observation[agent_index]
+    #             all_actions[agent_index, :] = agent.policy.find_next_action(dict_obs, self.agents, agent_index)
 
-        # After all agents have selected actions, run one dynamics update
-        for i, agent in enumerate(self.agents):
-            agent.take_action(all_actions[i,:], dt)
-    '''
+    #     # After all agents have selected actions, run one dynamics update
+    #     for i, agent in enumerate(self.agents):
+    #         agent.take_action(all_actions[i,:], dt)
 
     def _update_top_down_map(self):
         """ After agents have moved, call this to update the map with their new occupancies. """

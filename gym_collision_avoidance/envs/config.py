@@ -1,6 +1,6 @@
 import numpy as np
-#from gym_collision_avoidance.experiments.src.master_config import Master_Config
-from gym_collision_avoidance.experiments.src.master_config_deploy import Master_Config
+from gym_collision_avoidance.experiments.src.master_config import Master_Config
+# from gym_collision_avoidance.experiments.src.master_config_deploy import Master_Config
 master_config = Master_Config()
 
 class Config(object):
@@ -13,7 +13,7 @@ class Config(object):
 
         ### DISPLAY
         self.ANIMATE_EPISODES    = True
-        self.SHOW_EPISODE_PLOTS = False
+        self.SHOW_EPISODE_PLOTS = True
         self.SAVE_EPISODE_PLOTS = True
         if not hasattr(self, "PLOT_CIRCLES_ALONG_TRAJ"):
             self.PLOT_CIRCLES_ALONG_TRAJ = True
@@ -45,8 +45,8 @@ class Config(object):
         self.SOCIAL_NORMS = "none"
 
         ### SIMULATION
-        self.DT             = 0.2 # seconds between simulation time steps
-        self.NEAR_GOAL_THRESHOLD = 0.2
+        self.DT             = 0.25 # seconds between simulation time steps
+        self.NEAR_GOAL_THRESHOLD = 0.3
         self.MAX_TIME_RATIO = 2. # agent has this number times the straight-line-time to reach its goal before "timing out"
         
         ### TEST CASE SETTINGS
@@ -190,6 +190,65 @@ class Config(object):
             if 'std' in self.STATE_INFO_DICT[state]:
                 self.STD_OBS[state] = self.STATE_INFO_DICT[state]['std']
 
+
+class Train_5(Config):
+    def __init__(self):
+        Config.__init__(self)
+        print("::::::::::::Loading TRAIN CONFIG:::::::::::")
+        self.STATES_IN_OBS = ['dist_to_goal','heading_ego_frame','pref_speed','radius','other_agents_states']
+        self.TRAIN_SINGLE_AGENT = True # train only one agent (multi-agent possible)
+        self.MAX_NUM_AGENTS_IN_ENVIRONMENT = 6
+        self.MAX_NUM_AGENTS_TO_SIM = 6
+        self.TEST_CASE_ARGS['num_agents'] = 6
+        self.TEST_CASE_ARGS['policy_to_ensure'] = 'learning_cadrl'
+        self.TEST_CASE_ARGS['policies'] = ['learning_cadrl', 'learning']
+        self.agent_time_out                    = master_config.agent_time_out
+        self.DT                              = master_config.DT
+        self.MAX_TIME_RATIO                  = master_config.MAX_TIME_RATIO
+        self.SAVE_EPISODE_PLOTS                = master_config.SAVE_EPISODE_PLOTS
+        self.SHOW_EPISODE_PLOTS                = master_config.SHOW_EPISODE_PLOTS
+        self.ANIMATE_EPISODES                  = master_config.ANIMATE_EPISODES
+        self.NEAR_GOAL_THRESHOLD               = master_config.NEAR_GOAL_THRESHOLD
+        self.PLT_LIMITS                        = [[-10, 10], [-10, 10]]
+        self.NUM_AGENTS_TO_TEST = [6]
+        #self.POLICIES_TO_TEST = ['GA3C-CADRL-10']
+        self.POLICIES_TO_TEST = ['learning_cadrl', 'learning']
+        self.MAX_NUM_OTHER_AGENTS_OBSERVED     = self.MAX_NUM_AGENTS_IN_ENVIRONMENT - 1
+        self.PLT_FIG_SIZE                      = master_config.PLT_FIG_SIZE
+        self.PLOT_CIRCLES_ALONG_TRAJ           = master_config.PLOT_CIRCLES_ALONG_TRAJ
+        self.NUM_AGENTS_TO_TEST                = master_config.NUM_AGENTS_TO_TEST
+        self.POLICIES_TO_TEST                  = master_config.POLICIES_TO_TEST
+        self.NUM_TEST_CASES                    = master_config.NUM_TEST_CASES
+
+class Train_1(Config):
+    def __init__(self):
+        Config.__init__(self)
+        print("::::::::::::Loading TRAIN CONFIG:::::::::::")
+        self.STATES_IN_OBS = ['dist_to_goal','heading_ego_frame','pref_speed','radius','other_agent_states']
+        self.TRAIN_SINGLE_AGENT = True # train only one agent (multi-agent possible)
+        self.MAX_NUM_AGENTS_IN_ENVIRONMENT = 2
+        self.MAX_NUM_AGENTS_TO_SIM = 2
+        self.TEST_CASE_ARGS['num_agents'] = 2
+        self.TEST_CASE_ARGS['policy_to_ensure'] = 'learning_cadrl'
+        self.TEST_CASE_ARGS['policies'] = ['learning_cadrl', 'learning']
+        self.agent_time_out                    = master_config.agent_time_out
+        self.DT                              = master_config.DT
+        self.MAX_TIME_RATIO                  = master_config.MAX_TIME_RATIO
+        self.SAVE_EPISODE_PLOTS                = master_config.SAVE_EPISODE_PLOTS
+        self.SHOW_EPISODE_PLOTS                = master_config.SHOW_EPISODE_PLOTS
+        self.ANIMATE_EPISODES                  = master_config.ANIMATE_EPISODES
+        self.NEAR_GOAL_THRESHOLD               = master_config.NEAR_GOAL_THRESHOLD
+        self.PLT_LIMITS                        = [[-10, 10], [-10, 10]]
+        self.NUM_AGENTS_TO_TEST = [2]
+        #self.POLICIES_TO_TEST = ['GA3C-CADRL-10']
+        self.POLICIES_TO_TEST = ['learning_cadrl', 'learning']
+        self.MAX_NUM_OTHER_AGENTS_OBSERVED     = self.MAX_NUM_AGENTS_IN_ENVIRONMENT - 1
+        self.PLT_FIG_SIZE                      = master_config.PLT_FIG_SIZE
+        self.PLOT_CIRCLES_ALONG_TRAJ           = master_config.PLOT_CIRCLES_ALONG_TRAJ
+        self.NUM_AGENTS_TO_TEST                = master_config.NUM_AGENTS_TO_TEST
+        self.POLICIES_TO_TEST                  = master_config.POLICIES_TO_TEST
+        self.NUM_TEST_CASES                    = master_config.NUM_TEST_CASES
+
 class EvaluateConfig(Config):
     def __init__(self):
         self.MAX_NUM_AGENTS_IN_ENVIRONMENT   = master_config.MAX_NUM_AGENTS_IN_ENVIRONMENT
@@ -212,7 +271,6 @@ class Example(EvaluateConfig):
         self.NUM_AGENTS_TO_TEST                = master_config.NUM_AGENTS_TO_TEST
         self.POLICIES_TO_TEST                  = master_config.POLICIES_TO_TEST
         self.NUM_TEST_CASES                    = master_config.NUM_TEST_CASES
-
 
         self.MAX_NUM_AGENTS_IN_ENVIRONMENT     = master_config.MAX_NUM_AGENTS_IN_ENVIRONMENT
         self.MAX_NUM_OTHER_AGENTS_OBSERVED     = master_config.MAX_NUM_OTHER_AGENTS_OBSERVED

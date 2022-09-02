@@ -117,6 +117,9 @@ class Scenario_Config(object):
         #                      num mean        num std dev      vel mean       vel std dev   x_min           x_max           y_min           y_max      plot_size
         #self.POPULATION = [    None            ,None            ,1             ,None         ,0              ,10             ,0              ,10      , [[-1,11],[-1,11]]     ]
         self.POPULATION = [    None            ,None            ,1             ,None         ,0              ,5             ,0              ,5      , [[-1,6],[-1,6]]     ]
+        
+        
+        
         #generate random scenario here, write a function to generate and pass to self.scenario
 
 
@@ -137,6 +140,7 @@ class Scenario_Config(object):
                 self.scenario.append( real_dataset_traj( dataset_name=dataset_name ).pick_start( None, algorithm_name, self.exp_setting[4],self.exp_setting[5], self.exp_setting[6], self.exp_setting[7] , self.exp_setting[2],
                                                                                                  0.2 , 0, random_seed=i, num_agents_override= round(self.exp_setting[0]) ) )
 
+                
         elif experiment_number == 2: #population density evaluation
             
             #####for high population density, reduce size, hence less agents required######
@@ -194,6 +198,28 @@ class Scenario_Config(object):
                 
             
                 self.scenario.append( Seeded_Population_Scenario_Generator( population_density, algorithm_name, self.exp_setting[4],self.exp_setting[5], self.exp_setting[6], self.exp_setting[7], self.exp_setting[2], 0.2, 0, random_seed=i  ).population_random_square_edge() )
+        elif experiment_number == 5: #mixture of agents, # agents decided by human dataset
+            self.exp_setting = self.POPULATION
+
+            # number_of_agents = get_number_of_agents(observation)
+
+            #num agents = population density * area of scenario
+            number_of_agents = int(round(population_density * ( ( self.POPULATION[5] - self.POPULATION[4] )  *  ( self.POPULATION[7] - self.POPULATION[6] )  )))
+
+            self.scenario=[]
+            for i in range(experiment_iteration_num):
+                temp_name = []
+                for j in range(number_of_agents):   
+                    temp_name.append(algorithm_name[0])
+                # temp_name = get_algorithms(algorithm_name, number_of_agents)   #sample from pool of algorithms
+
+                algorithm_name = temp_name
+                print(algorithm_name)
+                
+            
+                self.scenario.append( Seeded_Population_Scenario_Generator( population_density, algorithm_name, self.exp_setting[4],self.exp_setting[5], self.exp_setting[6], self.exp_setting[7], self.exp_setting[2], 0.2, 0, random_seed=i  ).population_random_square_edge() )
+
+
 
                 
         '''
