@@ -18,8 +18,9 @@ The SNS simulator provides the following new features, in addition to what is av
 
 - Output agents trajectories during simulation, export the simulation results in the format of datasets such as ETH,ZARA1,ZARA2. Allowing users to directly use the simulated trajectories as a new extra dataset for further training.  
 
-- Agents can be easily configured to use different combinations of social navigation algorithms as their policies. (e.g. CADRL vs Socialforce )  
+- Agents can be easily configured to use different combinations of social navigation algorithms as their policies. (e.g. CADRL vs Socialforce )
 
+- Train agents against different combinations of social navigation algorithms, and compare the performance of the trained agents.
 
 ## Project Contributors  
 Sam Shum (cshum@andrew.cmu.edu)
